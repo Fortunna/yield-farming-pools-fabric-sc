@@ -4,9 +4,12 @@ pragma solidity 0.8.20;
 import "../FortunnaLib.sol";
 
 interface IFortunnaFactory {
-    function evacuateTokens(address token, uint256 amount) external;
-
-    function sendCollectedPayments(address token, address who) external;
+    event NativeTokenReceived(uint256 indexed amount);
+    function sendCollectedTokens(
+        address token,
+        address payable who,
+        uint256 amount
+    ) external;
 
     function createPool(
         bytes32 deploySalt,

@@ -16,27 +16,14 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     using FortunnaLib for bytes32;
     using Clones for address;
 
-    bytes32 public constant ALLOWED_REWARD_TOKEN_ROLE =
-        keccak256("ALLOWED_REWARD_TOKEN_ROLE");
-    bytes32 public constant ALLOWED_STAKING_TOKEN_ROLE =
-        keccak256("ALLOWED_STAKING_TOKEN_ROLE");
-    bytes32 public constant ALLOWED_EXTERNAL_TOKEN_ROLE =
-        keccak256("ALLOWED_EXTERNAL_TOKEN_ROLE");
-    bytes32 public constant BANNED_ROLE =
-        keccak256("BANNED_ROLE");
-    bytes32 public constant ALLOWED_PAYMENT_TOKEN_ROLE =
-        keccak256("ALLOWED_PAYMENT_TOKEN_ROLE");
-
-    uint256 public constant BASE_POINTS_MAX = 10000;
-
     mapping(bytes32 => address) public getPoolPrototype;
     FortunnaLib.PaymentInfo public paymentInfo;
 
     constructor(address[] memory paymentTokens) {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _grantRole(ALLOWED_PAYMENT_TOKEN_ROLE, address(0));
+        _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, address(0));
         for (uint256 i = 0; i < paymentTokens.length; i++) {
-            _grantRole(ALLOWED_PAYMENT_TOKEN_ROLE, paymentTokens[i]);
+            _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, paymentTokens[i]);
         }
     }
 
@@ -54,7 +41,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     }
 
     function renounceRole(bytes32 role, address account) public override {
-        if (hasRole(BANNED_ROLE, account)) revert FortunnaLib.Banned(account);
+        if (hasRole(FortunnaLib.BANNED_ROLE, account)) revert FortunnaLib.Banned(account);
         super.renounceRole(role, account);
     }
 
@@ -71,28 +58,46 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         uint256[] calldata _rewardTokensIndicies,
         address[] calldata _externalRewardTokens
     ) internal view {
-        if (hasRole(BANNED_ROLE, sender)) revert FortunnaLib.Banned(sender);
+        if (hasRole(FortunnaLib.BANNED_ROLE, sender)) revert FortunnaLib.Banned(sender);
         uint256 i = 0;
         address token;
         for (i; i < _stakingTokensIndicies.length; i++) {
             token = _utilizingTokens[_stakingTokensIndicies[i]];
-            if (!hasRole(ALLOWED_STAKING_TOKEN_ROLE, token)) {
+            if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
                 revert FortunnaLib.StakingTokenNotAllowed(token);
             }
         }
         i = 0;
         for (i; i < _rewardTokensIndicies.length; i++) {
             token = _utilizingTokens[_rewardTokensIndicies[i]];
-            if (!hasRole(ALLOWED_STAKING_TOKEN_ROLE, token)) {
+            if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
                 revert FortunnaLib.RewardTokenNotAllowed(token);
             }
         }
         i = 0;
         for (i; i < _externalRewardTokens.length; i++) {
             token = _externalRewardTokens[i];
-            if (!hasRole(ALLOWED_STAKING_TOKEN_ROLE, token)) {
+            if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
                 revert FortunnaLib.ExternalTokenNotAllowed(token);
             }
+        }
+    }
+
+    function _validateScalarParameters(FortunnaLib.PoolParameters calldata _poolParameters) internal view {
+        if (_poolParameters.chainId != block.chainid) {
+            revert FortunnaLib.ForeignChainId(_poolParameters.chainId);
+        }
+        if (_poolParameters.startTimestamp <= _poolParameters.endTimestamp) {
+            revert FortunnaLib.IncorrectInterval(_poolParameters.startTimestamp, _poolParameters.endTimestamp, "time");
+        }
+        if (_poolParameters.minStakeAmount <= _poolParameters.maxStakeAmount) {
+            revert FortunnaLib.IncorrectInterval(_poolParameters.minStakeAmount, _poolParameters.maxStakeAmount, "stakeAmount");
+        }
+        if (_poolParameters.earlyWithdrawalFeeBasePoints > FortunnaLib.BASE_POINTS_MAX) {
+            revert FortunnaLib.IncorrectBasePoints(_poolParameters.earlyWithdrawalFeeBasePoints, "earlyWithdrawal");
+        }
+        if (_poolParameters.depositWitdrawFeeBasePoints > FortunnaLib.BASE_POINTS_MAX) {
+            revert FortunnaLib.IncorrectBasePoints(_poolParameters.depositWitdrawFeeBasePoints, "depositWithdraw");
         }
     }
 
@@ -109,6 +114,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             poolParametersArrays.rewardTokensIndicies,
             poolParametersArrays.externalRewardTokens
         );
+        _validateScalarParameters(poolParameters);
 
         address prototypeAddress = getPoolPrototype[
             keccak256(bytes(poolParametersArrays.poolPrototypeName))
@@ -138,15 +144,23 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         );
     }
 
-    function evacuateTokens(address token, uint256 amount) external override {
+    function sendCollectedTokens(
+        address token,
+        address payable who,
+        uint256 amount
+    )
+        external 
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE) 
+    {
+        if (token != address(0)) {
+            IERC20(token).safeTransfer(_msgSender(), amount);
+        } else {
+            who.transfer(amount);
+        }
     }
 
-    function sendCollectedPayments(
-        address token,
-        address who
-    ) external override {}
-
-    receive() external payable {}
-
-    fallback() external {}
+    receive() external payable {
+        emit NativeTokenReceived(msg.value);
+    }
 }

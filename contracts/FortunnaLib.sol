@@ -8,6 +8,10 @@ library FortunnaLib {
     error ExternalTokenNotAllowed(address token);
     error UnknownPrototypeName(string name);
     error NotEnoughtPayment(uint256 amount);
+    
+    error ForeignChainId(uint256 chaidId);
+    error IncorrectInterval(uint256 start, uint256 finish, string name);
+    error IncorrectBasePoints(uint256 basePoints, string name);
 
     struct PoolParameters {
         uint256 chainId;
@@ -40,6 +44,19 @@ library FortunnaLib {
         address paymentToken;
         uint256 cost;
     }
+
+    bytes32 public constant ALLOWED_REWARD_TOKEN_ROLE =
+        keccak256("ALLOWED_REWARD_TOKEN_ROLE");
+    bytes32 public constant ALLOWED_STAKING_TOKEN_ROLE =
+        keccak256("ALLOWED_STAKING_TOKEN_ROLE");
+    bytes32 public constant ALLOWED_EXTERNAL_TOKEN_ROLE =
+        keccak256("ALLOWED_EXTERNAL_TOKEN_ROLE");
+    bytes32 public constant BANNED_ROLE =
+        keccak256("BANNED_ROLE");
+    bytes32 public constant ALLOWED_PAYMENT_TOKEN_ROLE =
+        keccak256("ALLOWED_PAYMENT_TOKEN_ROLE");
+    
+    uint256 public constant BASE_POINTS_MAX = 10000;
 
     function getMaskFromBooleans(
         bool[] calldata flags
