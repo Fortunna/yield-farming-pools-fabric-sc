@@ -2,7 +2,9 @@
   "name": "yield-farming-pools-factory-mvp",
   "author": "Fortunna",
   "scripts": {
-    "prettier": "prettier --write 'contracts/**/*.sol'"
+    "prettier-sol": "prettier --write 'contracts/**/*.sol'",
+    "solhint": "solhint 'contracts/**/*.sol'",
+    "solhint-fix": "solhint 'contracts/**/*.sol' --fix"
   },
   "private": true,
   "devDependencies": {

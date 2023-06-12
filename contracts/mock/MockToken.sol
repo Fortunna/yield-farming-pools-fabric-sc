@@ -4,7 +4,6 @@ pragma solidity 0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract MockToken is ERC20, Ownable {
     bool public blockTransfers;
     bool public blockTransfersFrom;
@@ -44,11 +43,10 @@ contract MockToken is ERC20, Ownable {
         }
     }
 
-    function transfer(address recipient, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) public override returns (bool) {
         if (blockTransfers) {
             if (transfersAllowed[msg.sender][recipient]) {
                 super._transfer(msg.sender, recipient, amount);
