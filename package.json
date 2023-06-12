@@ -1,0 +1,37 @@
+{
+  "name": "yield-farming-pools-factory-mvp",
+  "author": "Fortunna",
+  "scripts": {
+    "prettier": "prettier --write 'contracts/**/*.sol'"
+  },
+  "private": true,
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
+    "@nomiclabs/hardhat-ethers": "^2.2.1",
+    "@nomiclabs/hardhat-etherscan": "^3.1.2",
+    "@openzeppelin/contracts": "^4.8.0",
+    "chai": "^4.3.7",
+    "chai-bignumber": "^3.1.0",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.27.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "ethers": "^5.7.2",
+    "fs-extra": "^10.1.0",
+    "hardhat": "^2.12.2",
+    "hardhat-abi-exporter": "^2.10.1",
+    "hardhat-deploy": "^0.11.20",
+    "hardhat-docgen": "^1.3.0",
+    "hardhat-ethernal": "^3.1.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "hardhat-tracer": "^2.1.2",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-rc.1",
+    "solhint": "^3.3.7",
+    "solidity-coverage": "^0.7.21"
+  },
+  "packageManager": "yarn@3.6.0"
+}
