@@ -13,12 +13,12 @@ library FortunnaLib {
     /// @dev An error to be reverted if a `token` is not allowed to be pools reward token.
     /// @param token Some EIP20 compatible token.
     error RewardTokenNotAllowed(address token);
-    
+
     /// @dev An error to be reverted if a `token` is not allowed to be pools staking token.
     /// @param token Some EIP20 compatible token.
     error StakingTokenNotAllowed(address token);
-    
-    /// @dev An error to be reverted if a `token` is not allowed to be pools reward token 
+
+    /// @dev An error to be reverted if a `token` is not allowed to be pools reward token
     /// from an external protocol.
     /// @param token Some EIP20 compatible token.
     error ExternalTokenNotAllowed(address token);
@@ -31,16 +31,16 @@ library FortunnaLib {
     /// @dev An error to be reverted if the pool deployer didn't payed enough for it.
     /// @param amount An actual amount the deployer sent.
     error NotEnoughtPayment(uint256 amount);
-    
+
     /// @dev An error to be reverted if some data structures `length` is not defined correctly.
     /// @param length An actual length of the data structure.
     /// @param comment Some comment as to what kind of a data structure has been addressed to.
     error InvalidLength(uint256 length, string comment);
-    
+
     /// @dev An error to be reverted if in some two addresses arrays the elements aren't unique.
     /// @param someAddress An address which is equal in both arrays.
     error NotUniqueAddresses(address someAddress);
-    
+
     /// @dev An error to be reverted if the contract is being deployed at a wrong chain.
     /// @param chainId An actual chain ID.
     error ForeignChainId(uint256 chainId);
@@ -50,18 +50,22 @@ library FortunnaLib {
     /// @param finish An end of the interval.
     /// @param comment Some comment as to what kind of an interval this is.
     error IncorrectInterval(uint256 start, uint256 finish, string comment);
-    
+
     /// @dev An error to be reverted if some base points were defined out of their boundaries.
     /// @param basePoints An actual base points amount.
     /// @param comment Some comment as to what kind of a base points this is.
     error IncorrectBasePoints(uint256 basePoints, string comment);
+
+    /// @dev An error to be reverted if an `enity` is already exists in some address set.
+    /// @param entity An entity address.
+    error AddressAlreadyExists(address entity);
 
     /// @dev A struct to hold pools scalar deploy parameters.
     struct PoolParameters {
         // Expected chaidId of chain deploying to.
         uint256 chainId;
         // Start of the pool reward distribution period.
-        uint256 startTimestamp; 
+        uint256 startTimestamp;
         // End of the pool reward distribution period.
         uint256 endTimestamp;
         // Minimal amount for user to be able to deposit to the pool.
@@ -109,7 +113,7 @@ library FortunnaLib {
     /// @notice A role hash to mark addresses to be held as reward tokens.
     bytes32 public constant ALLOWED_REWARD_TOKEN_ROLE =
         keccak256("ALLOWED_REWARD_TOKEN_ROLE");
-    
+
     /// @notice A role hash to mark addresses to be held as staking tokens.
     bytes32 public constant ALLOWED_STAKING_TOKEN_ROLE =
         keccak256("ALLOWED_STAKING_TOKEN_ROLE");
@@ -119,13 +123,12 @@ library FortunnaLib {
         keccak256("ALLOWED_EXTERNAL_TOKEN_ROLE");
 
     /// @notice A role hash to mark addresses to be held as banned users.
-    bytes32 public constant BANNED_ROLE =
-        keccak256("BANNED_ROLE");
+    bytes32 public constant BANNED_ROLE = keccak256("BANNED_ROLE");
 
     /// @notice A role hash to mark addresses to be held as payment for pool deploy tokens.
     bytes32 public constant ALLOWED_PAYMENT_TOKEN_ROLE =
         keccak256("ALLOWED_PAYMENT_TOKEN_ROLE");
-    
+
     /// @notice A max of base points. (ex. Like 100 in percents)
     uint256 public constant BASE_POINTS_MAX = 10000;
 

@@ -13,16 +13,20 @@ interface IFortunnaFactory {
 
     /// @notice A getter function to acquire an address of the named pool prototype.
     /// @param poolPrototype Hash of the name of the pool prototype.
-    function getPoolPrototype(bytes32 poolPrototype) external view returns (address);
+    function getPoolPrototype(
+        bytes32 poolPrototype
+    ) external view returns (address);
 
     /// @notice A getter function to acquire the payment info for one pool deploy.
-    /// @return token An address of the token to be held as payment asset. 
+    /// @return token An address of the token to be held as payment asset.
     /// @return cost An actual cost of the pool deploy.
     function paymentInfo() external view returns (address token, uint256 cost);
 
     /// @notice An admin setter function to adjust payment info.
-    /// @param _paymentInfo A struct to hold new payment info. 
-    function setPaymentInfo(FortunnaLib.PaymentInfo calldata _paymentInfo) external;
+    /// @param _paymentInfo A struct to hold new payment info.
+    function setPaymentInfo(
+        FortunnaLib.PaymentInfo calldata _paymentInfo
+    ) external;
 
     /// @notice An admin function to create a link between deployed implementation of the pool prototype an it's name.
     /// @param poolPrototypeName A human readable name of the pool prototype.
@@ -49,12 +53,17 @@ interface IFortunnaFactory {
     ) external;
 
     /// @notice The main public function. It is deploying the pool according to the pool parameters and it's prototype.
-    /// @param deploySalt Some random 32 bytes to make the deploy cheaper.
     /// @param poolParameters A scalar parameters for the pool.
     /// @param poolParametersArrays A vector parameters for the pool.
     function createPool(
-        bytes32 deploySalt,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external payable returns (address poolAddress);
+
+    /// @notice A public getter function to acquire a pool address at the specific index.
+    /// @param index An index in the pools enumerable set.
+    function getPoolAt(uint256 index) external view returns (address);
+
+    /// @notice A public getter function to acquire the total amount of deployed pools.
+    function getPoolsLength() external view returns (uint256);
 }

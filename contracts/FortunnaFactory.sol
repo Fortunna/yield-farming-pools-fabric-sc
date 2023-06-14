@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import "./FortunnaLib.sol";
 import "./interfaces/IFortunnaFactory.sol";
 import "./interfaces/IFortunnaPool.sol";
 
@@ -18,6 +18,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     using SafeERC20 for IERC20;
     using FortunnaLib for bytes32;
     using Clones for address;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     /// @inheritdoc IFortunnaFactory
     mapping(bytes32 => address) public override getPoolPrototype;
@@ -25,14 +26,30 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// @inheritdoc IFortunnaFactory
     FortunnaLib.PaymentInfo public override paymentInfo;
 
+    /// @dev A set of unique deployed pools.
+    EnumerableSet.AddressSet internal pools;
+
     /// @notice A constructor.
     /// @param paymentTokens An array of tokens addresses to be allowed as payment for pool deploy tokens.
     constructor(address[] memory paymentTokens) {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, address(0));
         for (uint256 i = 0; i < paymentTokens.length; i++) {
-            _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, paymentTokens[i]);
+            _grantRole(
+                FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE,
+                paymentTokens[i]
+            );
         }
+    }
+
+    /// @inheritdoc IFortunnaFactory
+    function getPoolAt(uint256 index) external view override returns (address) {
+        return pools.at(index);
+    }
+
+    /// @inheritdoc IFortunnaFactory
+    function getPoolsLength() external view override returns (uint256) {
+        return pools.length();
     }
 
     /// @inheritdoc IFortunnaFactory
@@ -52,7 +69,8 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
 
     /// @inheritdoc AccessControl
     function renounceRole(bytes32 role, address account) public override {
-        if (hasRole(FortunnaLib.BANNED_ROLE, account)) revert FortunnaLib.Banned(account);
+        if (hasRole(FortunnaLib.BANNED_ROLE, account))
+            revert FortunnaLib.Banned(account);
         super.renounceRole(role, account);
     }
 
@@ -68,11 +86,11 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// Also there is a check if `_utilizingTokens` and `_externalRewardTokens` are unique arrays.
     /// @param sender Alias for `_msgSender()`.
     /// @param _utilizingTokens An array of tokens either for stake or for rewards.
-    /// @param _stakingTokensIndicies Indicies from `_utilizingTokens` indicating which are considered 
+    /// @param _stakingTokensIndicies Indicies from `_utilizingTokens` indicating which are considered
     /// staking tokens.
-    /// @param _rewardTokensIndicies Indicies from `_utilizingTokens` indicating which are considered 
+    /// @param _rewardTokensIndicies Indicies from `_utilizingTokens` indicating which are considered
     /// reward tokens.
-    /// @param _externalRewardTokens An array of tokens which are considered reward tokens but their 
+    /// @param _externalRewardTokens An array of tokens which are considered reward tokens but their
     /// origins are some external protocols. (ex. UNI token)
     function _validateRoles(
         address sender,
@@ -81,9 +99,13 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         uint256[] calldata _rewardTokensIndicies,
         address[] calldata _externalRewardTokens
     ) internal view {
-        if (hasRole(FortunnaLib.BANNED_ROLE, sender)) revert FortunnaLib.Banned(sender);
+        if (hasRole(FortunnaLib.BANNED_ROLE, sender))
+            revert FortunnaLib.Banned(sender);
         if (_utilizingTokens.length > 256) {
-            revert FortunnaLib.InvalidLength(_utilizingTokens.length, "utilizingTokens>256");
+            revert FortunnaLib.InvalidLength(
+                _utilizingTokens.length,
+                "utilizingTokens>256"
+            );
         }
         uint256 i = 0;
         address token;
@@ -119,31 +141,52 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// a valid time interval. Thirdly, if min and max stake amounts are making also a valid interval. Then,
     /// if early withdrawal fee and deposit/withdraw fee are represented as base points validly.
     /// @param _poolParameters A struct containing the scalar parameters of the pool.
-    function _validateScalarParameters(FortunnaLib.PoolParameters calldata _poolParameters) internal view {
+    function _validateScalarParameters(
+        FortunnaLib.PoolParameters calldata _poolParameters
+    ) internal view {
         if (_poolParameters.chainId != block.chainid) {
             revert FortunnaLib.ForeignChainId(_poolParameters.chainId);
         }
         if (_poolParameters.startTimestamp <= _poolParameters.endTimestamp) {
-            revert FortunnaLib.IncorrectInterval(_poolParameters.startTimestamp, _poolParameters.endTimestamp, "time");
+            revert FortunnaLib.IncorrectInterval(
+                _poolParameters.startTimestamp,
+                _poolParameters.endTimestamp,
+                "time"
+            );
         }
         if (_poolParameters.minStakeAmount <= _poolParameters.maxStakeAmount) {
-            revert FortunnaLib.IncorrectInterval(_poolParameters.minStakeAmount, _poolParameters.maxStakeAmount, "stakeAmount");
+            revert FortunnaLib.IncorrectInterval(
+                _poolParameters.minStakeAmount,
+                _poolParameters.maxStakeAmount,
+                "stakeAmount"
+            );
         }
-        if (_poolParameters.earlyWithdrawalFeeBasePoints > FortunnaLib.BASE_POINTS_MAX) {
-            revert FortunnaLib.IncorrectBasePoints(_poolParameters.earlyWithdrawalFeeBasePoints, "earlyWithdrawal");
+        if (
+            _poolParameters.earlyWithdrawalFeeBasePoints >
+            FortunnaLib.BASE_POINTS_MAX
+        ) {
+            revert FortunnaLib.IncorrectBasePoints(
+                _poolParameters.earlyWithdrawalFeeBasePoints,
+                "earlyWithdrawal"
+            );
         }
-        if (_poolParameters.depositWithdrawFeeBasePoints > FortunnaLib.BASE_POINTS_MAX) {
-            revert FortunnaLib.IncorrectBasePoints(_poolParameters.depositWithdrawFeeBasePoints, "depositWithdraw");
+        if (
+            _poolParameters.depositWithdrawFeeBasePoints >
+            FortunnaLib.BASE_POINTS_MAX
+        ) {
+            revert FortunnaLib.IncorrectBasePoints(
+                _poolParameters.depositWithdrawFeeBasePoints,
+                "depositWithdraw"
+            );
         }
     }
 
     /// @inheritdoc IFortunnaFactory
     function createPool(
-        bytes32 deploySalt,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external payable override returns (address poolAddress) {
-        address sender = _msgSender(); 
+        address sender = _msgSender();
         _validateRoles(
             sender,
             poolParametersArrays.utilizingTokens,
@@ -167,13 +210,23 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
                 revert FortunnaLib.NotEnoughtPayment(msg.value);
             }
         } else {
-            IERC20(paymentInfo.paymentToken).safeTransferFrom(sender, address(this), paymentInfo.cost);
+            IERC20(paymentInfo.paymentToken).safeTransferFrom(
+                sender,
+                address(this),
+                paymentInfo.cost
+            );
         }
 
+        bytes32 deploySalt = keccak256(
+            abi.encodePacked(prototypeAddress, sender, pools.length())
+        );
         poolAddress = Clones.predictDeterministicAddress(
             prototypeAddress,
             deploySalt
         );
+        if (!pools.add(poolAddress)) {
+            revert FortunnaLib.AddressAlreadyExists(poolAddress);
+        }
         Clones.cloneDeterministic(prototypeAddress, deploySalt);
         IFortunnaPool(poolAddress).initalize(
             poolParameters,
@@ -186,11 +239,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         address token,
         address payable who,
         uint256 amount
-    )
-        external 
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE) 
-    {
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         if (token != address(0)) {
             IERC20(token).safeTransfer(_msgSender(), amount);
         } else {
