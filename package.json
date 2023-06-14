@@ -11,6 +11,7 @@
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
     "@nomiclabs/hardhat-ethers": "^2.2.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.2",
+    "@openzeppelin/contracts": "^4.9.1",
     "chai": "^4.3.7",
     "chai-bignumber": "^3.1.0",
     "dotenv": "^16.0.3",
@@ -34,8 +35,5 @@
     "solhint": "^3.3.7",
     "solidity-coverage": "^0.7.21"
   },
-  "packageManager": "yarn@3.6.0",
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.9.1"
-  }
+  "packageManager": "yarn@3.6.0"
 }
