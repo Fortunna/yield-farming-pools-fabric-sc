@@ -85,54 +85,58 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// to be used as staking, reward, or external tokens and if the arrays lengths are less then 256.
     /// Also there is a check if `_utilizingTokens` and `_externalRewardTokens` are unique arrays.
     /// @param sender Alias for `_msgSender()`.
-    /// @param _utilizingTokens An array of tokens either for stake or for rewards.
-    /// @param _stakingTokensIndicies Indicies from `_utilizingTokens` indicating which are considered
-    /// staking tokens.
-    /// @param _rewardTokensIndicies Indicies from `_utilizingTokens` indicating which are considered
-    /// reward tokens.
-    /// @param _externalRewardTokens An array of tokens which are considered reward tokens but their
-    /// origins are some external protocols. (ex. UNI token)
+    /// @param stakingTokensMask A bit mask to define if the `utilizingTokens` token is for staking.
+    /// @param rewardTokensMask A bit mask to define if the `utilizingTokens` token is for user rewards.
+    /// @param utilizingTokens An array of tokens either for stake or for rewards.
     function _validateRoles(
         address sender,
-        address[] calldata _utilizingTokens,
-        uint256[] calldata _stakingTokensIndicies,
-        uint256[] calldata _rewardTokensIndicies,
-        address[] calldata _externalRewardTokens
+        uint256 initialRewardAmountsLength,
+        uint256 initialDepositAmountsLength,
+        bytes32 stakingTokensMask,
+        bytes32 rewardTokensMask,
+        address[] calldata utilizingTokens
     ) internal view {
         if (hasRole(FortunnaLib.BANNED_ROLE, sender))
             revert FortunnaLib.Banned(sender);
-        if (_utilizingTokens.length > 256) {
+        if (utilizingTokens.length > 256) {
             revert FortunnaLib.InvalidLength(
-                _utilizingTokens.length,
+                utilizingTokens.length,
                 "utilizingTokens>256"
             );
         }
-        uint256 i = 0;
-        address token;
-        for (i; i < _stakingTokensIndicies.length; i++) {
-            token = _utilizingTokens[_stakingTokensIndicies[i]];
-            if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
-                revert FortunnaLib.StakingTokenNotAllowed(token);
-            }
-        }
-        i = 0;
-        for (i; i < _rewardTokensIndicies.length; i++) {
-            token = _utilizingTokens[_rewardTokensIndicies[i]];
-            if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
-                revert FortunnaLib.RewardTokenNotAllowed(token);
-            }
-        }
-        i = 0;
-        for (i; i < _externalRewardTokens.length; i++) {
-            token = _externalRewardTokens[i];
-            if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
-                revert FortunnaLib.ExternalTokenNotAllowed(token);
-            }
-            for (uint256 j = 0; j < _utilizingTokens.length; j++) {
-                if (_utilizingTokens[j] == token) {
-                    revert FortunnaLib.NotUniqueAddresses(token);
+        for (uint8 i = 0; i < utilizingTokens.length; i++) {
+            address token = utilizingTokens[i];
+            if (stakingTokensMask.isBitUp(i)) {
+                if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
+                    revert FortunnaLib.NotAuthorized(
+                        FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE,
+                        token
+                    );
                 }
             }
+            if (rewardTokensMask.isBitUp(i)) {
+                if (!hasRole(FortunnaLib.ALLOWED_REWARD_TOKEN_ROLE, token)) {
+                    revert FortunnaLib.NotAuthorized(
+                        FortunnaLib.ALLOWED_REWARD_TOKEN_ROLE,
+                        token
+                    );
+                }
+            }
+        }
+        if (initialRewardAmountsLength != utilizingTokens.length) {
+            revert FortunnaLib.AreNotEqual(
+                initialRewardAmountsLength,
+                utilizingTokens.length,
+                "tokensLen!=initRewardLen"
+            );
+        }
+
+        if (initialDepositAmountsLength != utilizingTokens.length) {
+            revert FortunnaLib.AreNotEqual(
+                initialDepositAmountsLength,
+                utilizingTokens.length,
+                "tokensLen!=initDepositLen"
+            );
         }
     }
 
@@ -179,6 +183,15 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
                 "depositWithdraw"
             );
         }
+        if (
+            _poolParameters.totalRewardBasePointsPerDistribution >
+            FortunnaLib.BASE_POINTS_MAX
+        ) {
+            revert FortunnaLib.IncorrectBasePoints(
+                _poolParameters.totalRewardBasePointsPerDistribution,
+                "rewardBasePoints"
+            );
+        }
     }
 
     /// @inheritdoc IFortunnaFactory
@@ -189,10 +202,11 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         address sender = _msgSender();
         _validateRoles(
             sender,
-            poolParametersArrays.utilizingTokens,
-            poolParametersArrays.stakingTokensIndicies,
-            poolParametersArrays.rewardTokensIndicies,
-            poolParametersArrays.externalRewardTokens
+            poolParametersArrays.initialRewardAmounts.length,
+            poolParametersArrays.initialDepositAmounts.length,
+            poolParameters.stakingTokensMask,
+            poolParameters.rewardTokensMask,
+            poolParametersArrays.utilizingTokens
         );
         _validateScalarParameters(poolParameters);
 
@@ -228,7 +242,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             revert FortunnaLib.AddressAlreadyExists(poolAddress);
         }
         Clones.cloneDeterministic(prototypeAddress, deploySalt);
-        IFortunnaPool(poolAddress).initalize(
+        IFortunnaPool(poolAddress).initialize(
             poolParameters,
             poolParametersArrays
         );

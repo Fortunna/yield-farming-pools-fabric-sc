@@ -10,19 +10,6 @@ library FortunnaLib {
     /// @param account A banned user.
     error Banned(address account);
 
-    /// @dev An error to be reverted if a `token` is not allowed to be pools reward token.
-    /// @param token Some EIP20 compatible token.
-    error RewardTokenNotAllowed(address token);
-
-    /// @dev An error to be reverted if a `token` is not allowed to be pools staking token.
-    /// @param token Some EIP20 compatible token.
-    error StakingTokenNotAllowed(address token);
-
-    /// @dev An error to be reverted if a `token` is not allowed to be pools reward token
-    /// from an external protocol.
-    /// @param token Some EIP20 compatible token.
-    error ExternalTokenNotAllowed(address token);
-
     /// @dev An error to be reverted if an unknown prototype name would be used to deploy
     /// a pool.
     /// @param name Name of the pools prototype smart-contract.
@@ -60,6 +47,25 @@ library FortunnaLib {
     /// @param entity An entity address.
     error AddressAlreadyExists(address entity);
 
+    /// @dev An error to be reverted if the contract was being called before the initialization.
+    error NotInitialized();
+
+    /// @dev An error to be reverted if an `entity` does not possess the `role`.
+    /// @param role A role an entity doesn't posess.
+    /// @param entity An entity violating authorization.
+    error NotAuthorized(bytes32 role, address entity);
+
+    /// @dev An error to be reverted if some scalar property of the data structure was addressed wrongly.
+    /// @param scalar A scalar.
+    /// @param comment Some comment as to what kind of a data structure property this is.
+    error InvalidScalar(uint256 scalar, string comment);
+
+    /// @dev An error to be reverted if some pair of scalars is not equal, but they should be.
+    /// @param x A first scalar.
+    /// @param y A second scalar.
+    /// @param comment Some comment as to what kind of a data structure property this is.
+    error AreNotEqual(uint256 x, uint256 y, string comment);
+
     /// @dev A struct to hold pools scalar deploy parameters.
     struct PoolParameters {
         // Expected chaidId of chain deploying to.
@@ -78,9 +84,12 @@ library FortunnaLib {
         uint256 earlyWithdrawalFeeBasePoints;
         // A fee amount in base points to be charged from user if they would attempt to perform deposit/withdraw.
         uint256 depositWithdrawFeeBasePoints;
-        // A bit mask, where if the Nth bit is up then
-        // in Nth pair of initial reward info first element is an address, otherwise: index
-        bytes32 mask;
+        // A percent from total reward provided being distributed to stakers.
+        uint256 totalRewardBasePointsPerDistribution;
+        // A bit mask to indicate whether the token in `utilizingTokens` is staking token.
+        bytes32 stakingTokensMask;
+        // A bit mask to indicate whether the token in `utilizingTokens` is reward token.
+        bytes32 rewardTokensMask;
     }
 
     /// @dev A struct to hold pools vector deploy parameters.
@@ -89,15 +98,8 @@ library FortunnaLib {
         string poolPrototypeName;
         // An array of tokens to be used as either reward or staking tokens.
         address[] utilizingTokens;
-        // An array of tokens to be used as reward tokens from some external protocols.
-        address[] externalRewardTokens;
-        // An array of indicies indicating which of `utilizingTokens` addresses are staking tokens.
-        uint256[] stakingTokensIndicies;
-        // An array of indicies indicating which of `utilizingTokens` addresses are reward tokens.
-        uint256[] rewardTokensIndicies;
-        // An initial total rewards amounts per index or address;
-        // array of pairs <index or address, initial reward amount>
-        bytes32[2][] initialRewardAmounts;
+        // Array of pairs <index of reward token, initial total reward amount>
+        uint256[2][] initialRewardAmounts;
         // An array of pairs <index of staking token, deposit amount>
         uint256[2][] initialDepositAmounts;
     }
@@ -129,8 +131,15 @@ library FortunnaLib {
     bytes32 public constant ALLOWED_PAYMENT_TOKEN_ROLE =
         keccak256("ALLOWED_PAYMENT_TOKEN_ROLE");
 
+    /// @notice A role hash to indicate who can mint and burn the `FortunnaToken`'s.
+    bytes32 public constant LP_MINTER_BURNER_ROLE =
+        keccak256("LP_MINTER_BURNER_ROLE");
+
     /// @notice A max of base points. (ex. Like 100 in percents)
     uint256 public constant BASE_POINTS_MAX = 10000;
+
+    /// @notice A given precision for math operations;
+    uint256 public constant PRECISION = 1e10;
 
     /// @dev A helper function to generate bit masks from boolean array.
     /// @param flags A boolean array.
@@ -138,7 +147,7 @@ library FortunnaLib {
         bool[] calldata flags
     ) internal pure returns (bytes32 result) {
         if (flags.length > 256) {
-            revert InvalidLength(flags.length, "libMaskGen");
+            revert InvalidLength(flags.length, "flagsLength>256");
         }
         for (uint256 i = 0; i < flags.length; i++) {
             if (flags[i]) {
