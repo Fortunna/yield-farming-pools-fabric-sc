@@ -2,21 +2,12 @@
 pragma solidity 0.8.20;
 
 import "../FortunnaLib.sol";
+import "./INativeTokenReceivable.sol";
 
 /// @title The interface for the Fortunna Yield Farming pools factory.
 /// @author Fortunna Team
 /// @notice The Fortunna Yield Faming pools factory facilitates creation of Fortunna pools and control over the protocol fees.
-interface IFortunnaFactory {
-    /// @notice An event to be fired when native tokens arrive to the fabric.
-    /// @param amount An exact amount of the tokens arrived.
-    event NativeTokenReceived(uint256 indexed amount);
-
-    /// @notice A getter function to acquire an address of the named pool prototype.
-    /// @param poolPrototype Hash of the name of the pool prototype.
-    function getPoolPrototype(
-        bytes32 poolPrototype
-    ) external view returns (address);
-
+interface IFortunnaFactory is INativeTokenReceivable {
     /// @notice A getter function to acquire the payment info for one pool deploy.
     /// @return token An address of the token to be held as payment asset.
     /// @return cost An actual cost of the pool deploy.
@@ -28,13 +19,9 @@ interface IFortunnaFactory {
         FortunnaLib.PaymentInfo calldata _paymentInfo
     ) external;
 
-    /// @notice An admin function to create a link between deployed implementation of the pool prototype an it's name.
-    /// @param poolPrototypeName A human readable name of the pool prototype.
-    /// @param poolPrototype An address of the deployed implementation.
-    function setupPoolPrototype(
-        string calldata poolPrototypeName,
-        address poolPrototype
-    ) external;
+    /// @notice An admin function to create to add deployed prototype.
+    /// @param prototype An address of the deployed prototype.
+    function addPrototype(address prototype) external;
 
     /// @notice A public helper function to make mask generation quicker.
     /// @param flags An array of booleans to be converted to a mask.
@@ -53,9 +40,11 @@ interface IFortunnaFactory {
     ) external;
 
     /// @notice The main public function. It is deploying the pool according to the pool parameters and it's prototype.
+    /// @param fortunnaTokenPrototypeIndex A FortunaToken prototype index to clone.
     /// @param poolParameters A scalar parameters for the pool.
     /// @param poolParametersArrays A vector parameters for the pool.
     function createPool(
+        uint256 fortunnaTokenPrototypeIndex,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external payable returns (address poolAddress);
@@ -66,4 +55,11 @@ interface IFortunnaFactory {
 
     /// @notice A public getter function to acquire the total amount of deployed pools.
     function getPoolsLength() external view returns (uint256);
+
+    /// @notice A public getter function to acquire a prototype address at the specific index.
+    /// @param index An index in the pools enumerable set.
+    function getPrototypeAt(uint256 index) external view returns (address);
+
+    /// @notice A public getter function to acquire the total amount of deployed prototypes.
+    function getPrototypesLength() external view returns (uint256);
 }

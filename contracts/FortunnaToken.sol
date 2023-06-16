@@ -138,6 +138,9 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         address user,
         uint256 amount
     ) external payable override delegatedOnly {
+        if (!stakingOrRewardTokens) {
+            _onlyRoleInFactory(FortunnaLib.LP_MINTER_BURNER_ROLE);
+        }
         for (uint256 i = 0; i < underlyingTokens.length; i++) {
             uint256 amountIn = calcUnderlyingTokensInOrOutPerFortunnaToken(
                 i,
@@ -163,6 +166,9 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         address payable user,
         uint256 amount
     ) external override delegatedOnly {
+        if (!stakingOrRewardTokens) {
+            _onlyRoleInFactory(FortunnaLib.LP_MINTER_BURNER_ROLE);
+        }
         for (uint256 i = 0; i < underlyingTokens.length; i++) {
             uint256 amountOut = calcUnderlyingTokensInOrOutPerFortunnaToken(
                 i,
@@ -194,5 +200,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         }
     }
 
-    receive() external payable {}
+    receive() external payable {
+        emit NativeTokenReceived(msg.value);
+    }
 }

@@ -11,9 +11,9 @@ library FortunnaLib {
     error Banned(address account);
 
     /// @dev An error to be reverted if an unknown prototype name would be used to deploy
-    /// a pool.
-    /// @param name Name of the pools prototype smart-contract.
-    error UnknownPrototypeName(string name);
+    /// a pool or other utility smart-contract.
+    /// @param prototypeIndex An index of prototype smart-contract.
+    error UnknownPrototypeIndex(uint256 prototypeIndex);
 
     /// @dev An error to be reverted if the pool deployer didn't payed enough for it.
     /// @param amount An actual amount the deployer sent.
@@ -68,6 +68,8 @@ library FortunnaLib {
 
     /// @dev A struct to hold pools scalar deploy parameters.
     struct PoolParameters {
+        // An index of the pool in the factory list of pools.
+        uint256 poolIdx;
         // Expected chaidId of chain deploying to.
         uint256 chainId;
         // Start of the pool reward distribution period.
@@ -94,8 +96,6 @@ library FortunnaLib {
 
     /// @dev A struct to hold pools vector deploy parameters.
     struct PoolParametersArrays {
-        // A name of the pool prototype to be used.
-        string poolPrototypeName;
         // An array of tokens to be used as either reward or staking tokens.
         address[] utilizingTokens;
         // Array of pairs <index of reward token, initial total reward amount>

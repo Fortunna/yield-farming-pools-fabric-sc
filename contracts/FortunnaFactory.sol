@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import "./interfaces/IFortunnaFactory.sol";
 import "./interfaces/IFortunnaPool.sol";
+import "./interfaces/IFortunnaToken.sol";
 
 /// @title Canonical Fortunna Yield Farming pools factory
 /// @author Fortunna Team
@@ -21,19 +22,29 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /// @inheritdoc IFortunnaFactory
-    mapping(bytes32 => address) public override getPoolPrototype;
-
-    /// @inheritdoc IFortunnaFactory
     FortunnaLib.PaymentInfo public override paymentInfo;
 
     /// @dev A set of unique deployed pools.
     EnumerableSet.AddressSet internal pools;
 
+    /// @dev A set of unique deployed prototypes.
+    EnumerableSet.AddressSet internal prototypes;
+
+    mapping(uint256 => address[2]) public getFortunnaToken;
+
     /// @notice A constructor.
     /// @param paymentTokens An array of tokens addresses to be allowed as payment for pool deploy tokens.
-    constructor(address[] memory paymentTokens) {
+    constructor(
+        address _fortunnaTokenPrototype,
+        address _fortunnaPoolPrototype,
+        address _fortunnaPoolUniswapV3Prototype,
+        address[] memory paymentTokens
+    ) {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, address(0));
+        prototypes.add(_fortunnaPoolPrototype);
+        prototypes.add(_fortunnaPoolUniswapV3Prototype);
+        prototypes.add(_fortunnaTokenPrototype);
         for (uint256 i = 0; i < paymentTokens.length; i++) {
             _grantRole(
                 FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE,
@@ -60,11 +71,10 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     }
 
     /// @inheritdoc IFortunnaFactory
-    function setupPoolPrototype(
-        string calldata poolPrototypeName,
-        address poolPrototype
+    function addPrototype(
+        address prototype
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        getPoolPrototype[keccak256(bytes(poolPrototypeName))] = poolPrototype;
+        prototypes.add(prototype);
     }
 
     /// @inheritdoc AccessControl
@@ -196,9 +206,10 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
 
     /// @inheritdoc IFortunnaFactory
     function createPool(
+        uint256 fortunnaTokenPrototypeIndex,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
-    ) external payable override returns (address poolAddress) {
+    ) external payable override returns (address pool) {
         address sender = _msgSender();
         _validateRoles(
             sender,
@@ -210,13 +221,9 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         );
         _validateScalarParameters(poolParameters);
 
-        address prototypeAddress = getPoolPrototype[
-            keccak256(bytes(poolParametersArrays.poolPrototypeName))
-        ];
+        address prototypeAddress = prototypes.at(poolParameters.poolIdx);
         if (prototypeAddress == address(0)) {
-            revert FortunnaLib.UnknownPrototypeName(
-                poolParametersArrays.poolPrototypeName
-            );
+            revert FortunnaLib.UnknownPrototypeIndex(poolParameters.poolIdx);
         }
 
         if (paymentInfo.paymentToken == address(0)) {
@@ -234,15 +241,44 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         bytes32 deploySalt = keccak256(
             abi.encodePacked(prototypeAddress, sender, pools.length())
         );
-        poolAddress = Clones.predictDeterministicAddress(
-            prototypeAddress,
-            deploySalt
+        bytes32 stakingTokenDeploySalt = keccak256(
+            abi.encodePacked(deploySalt, bytes1(0x01))
         );
-        if (!pools.add(poolAddress)) {
-            revert FortunnaLib.AddressAlreadyExists(poolAddress);
+        bytes32 rewardTokenDeploySalt = keccak256(
+            abi.encodePacked(deploySalt, bytes1(0x02))
+        );
+
+        address fortunnaTokenPrototype = prototypes.at(
+            fortunnaTokenPrototypeIndex
+        );
+        pool = Clones.predictDeterministicAddress(prototypeAddress, deploySalt);
+
+        address stakingTokenAddress = Clones.predictDeterministicAddress(
+            fortunnaTokenPrototype,
+            stakingTokenDeploySalt
+        );
+        address rewardTokenAddress = Clones.predictDeterministicAddress(
+            fortunnaTokenPrototype,
+            rewardTokenDeploySalt
+        );
+
+        if (!pools.add(pool)) {
+            revert FortunnaLib.AddressAlreadyExists(pool);
         }
+
         Clones.cloneDeterministic(prototypeAddress, deploySalt);
-        IFortunnaPool(poolAddress).initialize(
+        Clones.cloneDeterministic(
+            fortunnaTokenPrototype,
+            stakingTokenDeploySalt
+        );
+        Clones.cloneDeterministic(
+            fortunnaTokenPrototype,
+            rewardTokenDeploySalt
+        );
+
+        IFortunnaPool(pool).initialize(
+            stakingTokenAddress,
+            rewardTokenAddress,
             poolParameters,
             poolParametersArrays
         );
@@ -259,6 +295,23 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         } else {
             who.transfer(amount);
         }
+    }
+
+    /// @inheritdoc IFortunnaFactory
+    function getPrototypeAt(
+        uint256 index
+    ) external view override returns (address result) {
+        result = prototypes.at(index);
+    }
+
+    /// @inheritdoc IFortunnaFactory
+    function getPrototypesLength()
+        external
+        view
+        override
+        returns (uint256 result)
+    {
+        result = prototypes.length();
     }
 
     /// @dev Every income in native tokens should be recorded as the behaviour

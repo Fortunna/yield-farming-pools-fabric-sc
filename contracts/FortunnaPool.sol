@@ -12,6 +12,7 @@ import "./FactoryAuthorized.sol";
 
 contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     using SafeERC20 for IERC20;
+    using SafeERC20 for IFortunnaToken;
     using FortunnaLib for bytes32;
 
     struct UserInfo {
@@ -36,9 +37,11 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     uint256 public totalRewardTokensBalance;
 
     mapping(address => UserInfo) public usersInfo;
-    FortunnaLib.PoolParametersArrays public vectorParams;
+    FortunnaLib.PoolParametersArrays internal vectorParams;
 
     function initialize(
+        address _stakingToken,
+        address _rewardToken,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external override initializer {
@@ -46,8 +49,10 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         scalarParams = poolParameters;
         vectorParams = poolParametersArrays;
         super._initialize(__factory);
-        // deploy fortunna token for staking,
-        // deploy fortunna token for rewards
+        stakingToken = IFortunnaToken(_stakingToken);
+        rewardToken = IFortunnaToken(_rewardToken);
+        stakingToken.initialize(true, poolParameters, poolParametersArrays);
+        rewardToken.initialize(false, poolParameters, poolParametersArrays);
     }
 
     function pendingRewards(address user) external view returns (uint256) {
@@ -68,17 +73,95 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
             userInfo.rewardDebt;
     }
 
-    function _provideRewardTokens(uint256 amount) internal returns (uint256) {}
+    function _provideRewardTokens(uint256 amount) internal {
+        totalRewardTokensBalance += amount;
+    }
 
-    function updatePool() public {}
+    function updatePool() public {
+        if (block.timestamp <= lastRewardTimestamp) {
+            return;
+        }
+        if (totalStakedTokensBalance == 0) {
+            lastRewardTimestamp = block.timestamp;
+            return;
+        }
+        uint256 reward = ((block.timestamp - lastRewardTimestamp) *
+            rewardTokensPerSec *
+            allocationPoint) / totalAllocatedPoints;
+        _provideRewardTokens(reward);
+        accRewardTokenPerShare +=
+            (rewardTokensPerSec * FortunnaLib.PRECISION) /
+            totalStakedTokensBalance;
+        lastRewardTimestamp = block.timestamp;
+    }
 
-    function stake(uint256 amount) external {}
+    function stake(uint256 amount) external {
+        address sender = _msgSender();
+        UserInfo storage userInfo = usersInfo[sender];
+        updatePool();
+        if (amount > 0) {
+            uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
+                FortunnaLib.PRECISION -
+                userInfo.rewardDebt;
+            _safeRewardTransfer(sender, pending);
+            totalRewardTokensBalance -= pending;
+        }
+        stakingToken.safeTransferFrom(sender, address(this), amount);
+        totalStakedTokensBalance += amount;
+        userInfo.amount += amount;
+        userInfo.rewardDebt =
+            (userInfo.amount * accRewardTokenPerShare) /
+            FortunnaLib.PRECISION;
+        emit Staked(sender, amount);
+    }
 
-    function withdraw(uint256 amount) external {}
+    function withdraw(uint256 amount) external {
+        address sender = _msgSender();
+        UserInfo storage userInfo = usersInfo[sender];
+        if (userInfo.amount < amount) {
+            revert FortunnaLib.InvalidScalar(amount, "cannotWithdrawThisMuch");
+        }
+        getReward();
+        userInfo.amount -= amount;
+        userInfo.rewardDebt =
+            (userInfo.amount * accRewardTokenPerShare) /
+            FortunnaLib.PRECISION;
+        stakingToken.safeTransfer(sender, amount);
+        totalStakedTokensBalance -= amount;
+        emit Withdrawn(sender, amount);
+    }
 
-    function getReward() public {}
+    function emergencyWithdraw() external {
+        address sender = _msgSender();
+        UserInfo storage userInfo = usersInfo[sender];
+        stakingToken.safeTransfer(sender, userInfo.amount);
+        emit EmergencyWithdraw(sender, userInfo.amount);
+        totalStakedTokensBalance -= userInfo.amount;
+        userInfo.amount = 0;
+        userInfo.rewardDebt = 0;
+    }
+
+    function getReward() public {
+        address sender = _msgSender();
+        UserInfo storage userInfo = usersInfo[sender];
+        updatePool();
+        uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
+            FortunnaLib.PRECISION -
+            userInfo.rewardDebt;
+        _safeRewardTransfer(sender, pending);
+        totalRewardTokensBalance -= pending;
+    }
 
     function factory() external view override returns (address) {
         return _factory;
+    }
+
+    function _safeRewardTransfer(address to, uint256 amount) internal {
+        if (amount == 0) return;
+        if (amount > totalRewardTokensBalance) {
+            IERC20(rewardToken).safeTransfer(to, totalRewardTokensBalance);
+        } else {
+            IERC20(rewardToken).safeTransfer(to, amount);
+        }
     }
 }

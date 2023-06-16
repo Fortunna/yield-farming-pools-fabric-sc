@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import "../FortunnaLib.sol";
+import "./INativeTokenReceivable.sol";
 
-interface IFortunnaToken is IERC20, IERC20Metadata {
+interface IFortunnaToken is IERC20, IERC20Metadata, INativeTokenReceivable {
     function mint(address user, uint256 amount) external payable;
 
     function burn(address payable user, uint256 amount) external;
