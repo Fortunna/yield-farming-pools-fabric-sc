@@ -13,7 +13,7 @@ abstract contract FactoryAuthorized is
     Pausable,
     ReentrancyGuard
 {
-    address public factory;
+    address internal _factory;
 
     modifier delegatedOnly() {
         if (_isInitializing()) {
@@ -24,7 +24,7 @@ abstract contract FactoryAuthorized is
 
     function _onlyRoleInFactory(bytes32 role) internal view {
         address sender = _msgSender();
-        if (!IAccessControl(factory).hasRole(role, sender)) {
+        if (!IAccessControl(_factory).hasRole(role, sender)) {
             revert FortunnaLib.NotAuthorized(role, sender);
         }
     }
@@ -40,8 +40,8 @@ abstract contract FactoryAuthorized is
         _;
     }
 
-    function _initialize(address _factory) internal {
-        factory = _factory;
+    function _initialize(address __factory) internal {
+        _factory = __factory;
     }
 
     /// @notice Triggers paused state.

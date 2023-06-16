@@ -22,7 +22,6 @@ interface IFortunnaToken is IERC20, IERC20Metadata {
     ) external view returns (uint256 underlyingTokensInOrOut);
 
     function initialize(
-        address factory,
         bool stakingOrRewardTokens,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays

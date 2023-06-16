@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
+import "./interfaces/IFortunnaPool.sol";
 
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
@@ -31,13 +32,13 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     constructor() ERC20("Fortunna Token", "FTA") {}
 
     function initialize(
-        address factory,
         bool _stakingOrRewardTokens,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external payable override initializer {
-        _initialize(factory);
-        pool = _msgSender();
+        address sender = _msgSender();
+        pool = sender;
+        super._initialize(IFortunnaPool(sender).factory());
         stakingOrRewardTokens = _stakingOrRewardTokens;
         uint256 initialReserve;
         _mint(address(0), 1e6); // to make mint/burn functions work and not to dry out entirely the liquidity.
@@ -89,9 +90,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         result = string(
             abi.encodePacked(
                 "Fortunna LP token",
-                stakingOrRewardTokens
-                    ? " for staking <"
-                    : " for rewards <",
+                stakingOrRewardTokens ? " for staking <" : " for rewards <",
                 underlyingTokensSymbols,
                 ">"
             )

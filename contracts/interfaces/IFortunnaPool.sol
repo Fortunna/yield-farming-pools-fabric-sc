@@ -21,6 +21,8 @@ interface IFortunnaPool {
         uint256 reward
     );
 
+    function factory() external view returns (address);
+
     function initialize(
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
