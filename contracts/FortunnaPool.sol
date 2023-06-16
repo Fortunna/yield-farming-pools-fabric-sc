@@ -29,8 +29,6 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     uint256 public lastRewardTimestamp;
     uint256 public accRewardTokenPerShare;
 
-    uint256 public allocationPoint;
-    uint256 public totalAllocatedPoints;
     uint256 public rewardTokensPerSec;
 
     uint256 public totalStakedTokensBalance;
@@ -60,9 +58,8 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         uint256 _accRewardTokenPerShare = accRewardTokenPerShare;
         uint256 _stakingTokenBalance = totalStakedTokensBalance;
         if (block.timestamp > lastRewardTimestamp && _stakingTokenBalance > 0) {
-            uint256 reward = ((block.timestamp - lastRewardTimestamp) *
-                rewardTokensPerSec *
-                allocationPoint) / totalAllocatedPoints;
+            uint256 reward = (block.timestamp - lastRewardTimestamp) *
+                rewardTokensPerSec;
             _accRewardTokenPerShare +=
                 (reward * FortunnaLib.PRECISION) /
                 _stakingTokenBalance;
@@ -85,9 +82,8 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
             lastRewardTimestamp = block.timestamp;
             return;
         }
-        uint256 reward = ((block.timestamp - lastRewardTimestamp) *
-            rewardTokensPerSec *
-            allocationPoint) / totalAllocatedPoints;
+        uint256 reward = (block.timestamp - lastRewardTimestamp) *
+            rewardTokensPerSec;
         _provideRewardTokens(reward);
         accRewardTokenPerShare +=
             (rewardTokensPerSec * FortunnaLib.PRECISION) /
