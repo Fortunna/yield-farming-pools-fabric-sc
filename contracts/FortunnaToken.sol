@@ -22,7 +22,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
 
     error InvalidWeightedInput(uint256[] amounts);
 
-    bool public stakingOrRewardTokens;
+    bool public isStakingOrRewardToken;
     address public pool;
     bytes internal underlyingTokensSymbols = bytes("");
 
@@ -39,7 +39,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         address sender = _msgSender();
         pool = sender;
         super._initialize(IFortunnaPool(sender).factory());
-        stakingOrRewardTokens = _stakingOrRewardTokens;
+        isStakingOrRewardToken = _stakingOrRewardTokens;
         uint256 initialReserve;
         _mint(address(0), 1e6); // to make mint/burn functions work and not to dry out entirely the liquidity.
         for (
@@ -90,7 +90,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         result = string(
             abi.encodePacked(
                 "Fortunna LP token",
-                stakingOrRewardTokens ? " for staking <" : " for rewards <",
+                isStakingOrRewardToken ? " for staking <" : " for rewards <",
                 underlyingTokensSymbols,
                 ">"
             )
@@ -106,7 +106,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     {
         result = string(
             abi.encodePacked(
-                stakingOrRewardTokens ? "fts" : "ftr",
+                isStakingOrRewardToken ? "fts" : "ftr",
                 underlyingTokensSymbols
             )
         );
@@ -138,7 +138,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         address user,
         uint256 amount
     ) external payable override delegatedOnly {
-        if (!stakingOrRewardTokens) {
+        if (!isStakingOrRewardToken) {
             _onlyRoleInFactory(FortunnaLib.LP_MINTER_BURNER_ROLE);
         }
         for (uint256 i = 0; i < underlyingTokens.length; i++) {
@@ -166,7 +166,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         address payable user,
         uint256 amount
     ) external override delegatedOnly {
-        if (!stakingOrRewardTokens) {
+        if (!isStakingOrRewardToken) {
             _onlyRoleInFactory(FortunnaLib.LP_MINTER_BURNER_ROLE);
         }
         for (uint256 i = 0; i < underlyingTokens.length; i++) {
