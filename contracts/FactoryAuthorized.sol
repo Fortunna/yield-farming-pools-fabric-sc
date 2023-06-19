@@ -36,7 +36,7 @@ abstract contract FactoryAuthorized is
     }
 
     modifier only(bytes32 role) {
-        _onlyRoleInFactory(0x00);
+        _onlyRoleInFactory(role);
         _;
     }
 

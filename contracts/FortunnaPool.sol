@@ -25,14 +25,15 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     IFortunnaToken public stakingToken;
     IFortunnaToken public rewardToken;
 
-    uint256 public allocPoint;
     uint256 public lastRewardTimestamp;
     uint256 public accRewardTokenPerShare;
 
     uint256 public rewardTokensPerSec;
 
     uint256 public totalStakedTokensBalance;
-    uint256 public totalRewardTokensBalance;
+
+    uint256 public requestedRewardTokensToDistribute;
+    uint256 public providedRewardTokensBalance;
 
     mapping(address => UserInfo) public usersInfo;
     FortunnaLib.PoolParametersArrays internal vectorParams;
@@ -71,7 +72,11 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     }
 
     function _provideRewardTokens(uint256 amount) internal {
-        totalRewardTokensBalance += amount;
+        amount += requestedRewardTokensToDistribute;
+        if (providedRewardTokensBalance > amount) {
+            revert FortunnaLib.NotEnoughRewardToDistribute(providedRewardTokensBalance, requestedRewardTokensToDistribute);
+        }
+        requestedRewardTokensToDistribute = amount;
     }
 
     function updatePool() public {
@@ -100,7 +105,8 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
                 FortunnaLib.PRECISION -
                 userInfo.rewardDebt;
             _safeRewardTransfer(sender, pending);
-            totalRewardTokensBalance -= pending;
+            requestedRewardTokensToDistribute -= pending;
+            providedRewardTokensBalance -= pending;
         }
         stakingToken.safeTransferFrom(sender, address(this), amount);
         totalStakedTokensBalance += amount;
@@ -117,7 +123,16 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         if (userInfo.amount < amount) {
             revert FortunnaLib.InvalidScalar(amount, "cannotWithdrawThisMuch");
         }
-        getReward();
+        
+        updatePool();
+        uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
+                FortunnaLib.PRECISION -
+                userInfo.rewardDebt;
+        _safeRewardTransfer(sender, pending);
+
+        requestedRewardTokensToDistribute -= pending;
+        providedRewardTokensBalance -= pending;
+        
         userInfo.amount -= amount;
         userInfo.rewardDebt =
             (userInfo.amount * accRewardTokenPerShare) /
@@ -137,25 +152,19 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         userInfo.rewardDebt = 0;
     }
 
-    function getReward() public {
-        address sender = _msgSender();
-        UserInfo storage userInfo = usersInfo[sender];
-        updatePool();
-        uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
-            FortunnaLib.PRECISION -
-            userInfo.rewardDebt;
-        _safeRewardTransfer(sender, pending);
-        totalRewardTokensBalance -= pending;
-    }
-
     function factory() external view override returns (address) {
         return _factory;
     }
 
+    function provideTotalRewards(uint256 amount) external only(FortunnaLib.POOL_REWARDS_PROVIDER)  {
+        rewardToken.safeTransferFrom(_msgSender(), address(this), amount);
+        providedRewardTokensBalance += amount;
+    }
+
     function _safeRewardTransfer(address to, uint256 amount) internal {
         if (amount == 0) return;
-        if (amount > totalRewardTokensBalance) {
-            IERC20(rewardToken).safeTransfer(to, totalRewardTokensBalance);
+        if (amount > requestedRewardTokensToDistribute) {
+            IERC20(rewardToken).safeTransfer(to, requestedRewardTokensToDistribute);
         } else {
             IERC20(rewardToken).safeTransfer(to, amount);
         }

@@ -66,6 +66,10 @@ library FortunnaLib {
     /// @param comment Some comment as to what kind of a data structure property this is.
     error AreNotEqual(uint256 x, uint256 y, string comment);
 
+    error InvalidWeightedInput(uint256[] amounts);
+
+    error NotEnoughRewardToDistribute(uint256 provided, uint256 actual);
+
     /// @dev A struct to hold pools scalar deploy parameters.
     struct PoolParameters {
         // An index of the pool in the factory list of pools.
@@ -134,6 +138,10 @@ library FortunnaLib {
     /// @notice A role hash to indicate who can mint and burn the `FortunnaToken`'s.
     bytes32 public constant LP_MINTER_BURNER_ROLE =
         keccak256("LP_MINTER_BURNER_ROLE");
+
+    /// @notice A role hash to indicate who can mint and burn the `FortunnaToken`'s.
+    bytes32 public constant POOL_REWARDS_PROVIDER =
+        keccak256("POOL_REWARDS_PROVIDER");
 
     /// @notice A max of base points. (ex. Like 100 in percents)
     uint256 public constant BASE_POINTS_MAX = 10000;

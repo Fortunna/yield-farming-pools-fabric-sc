@@ -20,8 +20,6 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using FortunnaLib for bytes32;
     using Address for address payable;
 
-    error InvalidWeightedInput(uint256[] amounts);
-
     bool public isStakingOrRewardToken;
     address public pool;
     bytes internal underlyingTokensSymbols = bytes("");
