@@ -66,6 +66,14 @@ library FortunnaLib {
     /// @param comment Some comment as to what kind of a data structure property this is.
     error AreNotEqual(uint256 x, uint256 y, string comment);
 
+    error NotEnoughStaked(uint256 amount, uint256 limit);
+
+    error TooMuchStaked(uint256 amount, uint256 limit);
+
+    error DistributionEnded(uint256 timeDifference);
+    
+    error DistributionNotStarted(uint256 timeDifference);
+
     error InvalidWeightedInput(uint256[] amounts);
 
     error NotEnoughRewardToDistribute(uint256 provided, uint256 actual);

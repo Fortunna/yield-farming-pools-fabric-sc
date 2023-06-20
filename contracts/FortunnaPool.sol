@@ -20,6 +20,10 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         uint256 rewardDebt;
     }
 
+    enum Fee {
+        GET_REWARD, STAKE, WITHDRAW 
+    }
+
     FortunnaLib.PoolParameters public scalarParams;
 
     IFortunnaToken public stakingToken;
@@ -32,8 +36,11 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
 
     uint256 public totalStakedTokensBalance;
 
+    uint256 public expectedRewardTokensBalanceToDistribute;
     uint256 public requestedRewardTokensToDistribute;
     uint256 public providedRewardTokensBalance;
+
+    uint256[] internal _accumulatedFees;
 
     mapping(address => UserInfo) public usersInfo;
     FortunnaLib.PoolParametersArrays internal vectorParams;
@@ -96,19 +103,32 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         lastRewardTimestamp = block.timestamp;
     }
 
-    function stake(uint256 amount) external {
+    function _checkTimeIntervals() internal view {
+        if (block.timestamp < scalarParams.startTimestamp) {
+            revert FortunnaLib.DistributionNotStarted(scalarParams.startTimestamp - block.timestamp);
+        }
+        if (block.timestamp > scalarParams.endTimestamp) {
+            revert FortunnaLib.DistributionEnded(block.timestamp - scalarParams.endTimestamp);
+        }
+    }
+
+    function stake(uint256 amount) external nonReentrant {
+        if (amount > scalarParams.maxStakeAmount) {
+            revert FortunnaLib.TooMuchStaked(amount, scalarParams.maxStakeAmount);
+        }
+        if (amount < scalarParams.minStakeAmount) {
+            revert FortunnaLib.NotEnoughStaked(amount, scalarParams.minStakeAmount);
+        }
+        _checkTimeIntervals();
         address sender = _msgSender();
         UserInfo storage userInfo = usersInfo[sender];
-        updatePool();
-        if (amount > 0) {
-            uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
-                FortunnaLib.PRECISION -
-                userInfo.rewardDebt;
-            _safeRewardTransfer(sender, pending);
-            requestedRewardTokensToDistribute -= pending;
-            providedRewardTokensBalance -= pending;
-        }
+        _getReward();
         stakingToken.safeTransferFrom(sender, address(this), amount);
+        if (scalarParams.depositWithdrawFeeBasePoints > 0) {
+            uint256 fee = amount * scalarParams.depositWithdrawFeeBasePoints / FortunnaLib.BASE_POINTS_MAX;
+            _accumulatedFees[uint256(Fee.STAKE)] += fee;
+            amount -= fee;
+        }
         totalStakedTokensBalance += amount;
         userInfo.amount += amount;
         userInfo.rewardDebt =
@@ -117,29 +137,56 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         emit Staked(sender, amount);
     }
 
-    function withdraw(uint256 amount) external {
+    function withdraw(uint256 amount) external nonReentrant {
+        _checkTimeIntervals();
         address sender = _msgSender();
         UserInfo storage userInfo = usersInfo[sender];
         if (userInfo.amount < amount) {
             revert FortunnaLib.InvalidScalar(amount, "cannotWithdrawThisMuch");
         }
-        
-        updatePool();
-        uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
-                FortunnaLib.PRECISION -
-                userInfo.rewardDebt;
-        _safeRewardTransfer(sender, pending);
-
-        requestedRewardTokensToDistribute -= pending;
-        providedRewardTokensBalance -= pending;
-        
+        _getReward();
         userInfo.amount -= amount;
         userInfo.rewardDebt =
             (userInfo.amount * accRewardTokenPerShare) /
             FortunnaLib.PRECISION;
-        stakingToken.safeTransfer(sender, amount);
         totalStakedTokensBalance -= amount;
+        if (scalarParams.depositWithdrawFeeBasePoints > 0) {
+            uint256 fee = amount * scalarParams.depositWithdrawFeeBasePoints / FortunnaLib.BASE_POINTS_MAX;
+            _accumulatedFees[uint256(Fee.WITHDRAW)] += fee;
+            amount -= fee;
+        }
+        stakingToken.safeTransfer(sender, amount);
         emit Withdrawn(sender, amount);
+    }
+
+    function _getReward() internal {
+        address sender = _msgSender();
+        UserInfo storage userInfo = usersInfo[sender];
+        updatePool();
+        uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
+                FortunnaLib.PRECISION -
+                userInfo.rewardDebt;
+        uint256 startTimestamp = scalarParams.startTimestamp;
+
+        uint256 fee = 0;
+        if (
+            pending > 0 
+            && block.timestamp > startTimestamp 
+            && block.timestamp < startTimestamp + scalarParams.minLockUpRewardsPeriod
+        ) {
+            fee = pending * scalarParams.earlyWithdrawalFeeBasePoints / FortunnaLib.BASE_POINTS_MAX;
+            _accumulatedFees[uint256(Fee.GET_REWARD)] += fee;
+            pending -= fee;
+        }
+
+        _safeRewardTransfer(sender, pending);
+        requestedRewardTokensToDistribute -= pending + fee;
+        providedRewardTokensBalance -= pending + fee;
+    }
+
+    function getReward() external nonReentrant {
+        _checkTimeIntervals();
+        _getReward();
     }
 
     function emergencyWithdraw() external {
@@ -156,7 +203,31 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         return _factory;
     }
 
-    function provideTotalRewards(uint256 amount) external only(FortunnaLib.POOL_REWARDS_PROVIDER)  {
+    function getAccumulatedFeesAmount(Fee fee) external view returns (uint256) {
+        return _accumulatedFees[uint256(fee)];
+    }
+
+    function withdrawFee(address receiver, Fee fee) public onlyAdmin {
+        if (fee == Fee.GET_REWARD) {
+            _safeRewardTransfer(receiver, _accumulatedFees[uint256(fee)]);
+        }
+        if (fee == Fee.STAKE || fee == Fee.WITHDRAW) {
+            stakingToken.safeTransfer(receiver, _accumulatedFees[uint256(fee)]);
+        }
+    }
+
+    function withdrawAllFees(address receiver) external onlyAdmin {
+        for (uint256 i = 0; i < _accumulatedFees.length; i++) {
+            withdrawFee(receiver, Fee(i));
+        }
+    }
+
+    function addExpectedRewardTokensBalanceToDistribute(uint256 amount) external only(FortunnaLib.POOL_REWARDS_PROVIDER) {
+        expectedRewardTokensBalanceToDistribute += amount;
+    } 
+
+    function providePartOfTotalRewards() external only(FortunnaLib.POOL_REWARDS_PROVIDER)  {
+        uint256 amount = expectedRewardTokensBalanceToDistribute * scalarParams.totalRewardBasePointsPerDistribution / FortunnaLib.BASE_POINTS_MAX;
         rewardToken.safeTransferFrom(_msgSender(), address(this), amount);
         providedRewardTokensBalance += amount;
     }
