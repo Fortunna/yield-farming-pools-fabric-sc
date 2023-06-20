@@ -161,6 +161,9 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         if (_poolParameters.chainId != block.chainid) {
             revert FortunnaLib.ForeignChainId(_poolParameters.chainId);
         }
+        if (_poolParameters.poolIdx != pools.length()) {
+            revert FortunnaLib.InvalidScalar(_poolParameters.poolIdx, "invalidNextIndex");
+        }
         if (_poolParameters.startTimestamp <= _poolParameters.endTimestamp) {
             revert FortunnaLib.IncorrectInterval(
                 _poolParameters.startTimestamp,
