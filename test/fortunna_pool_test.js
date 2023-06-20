@@ -1,4 +1,3 @@
-const {expect} = require("chai");
 const hre = require("hardhat");
 const {
   withImpersonatedSigner, 
@@ -7,10 +6,10 @@ const {
 } = require('../deploy/helpers');
 const {ethers, deployments, getNamedAccounts} = hre;
 
-describe("<SOME CONTRACT>", () => {
+describe("FortunnaPool", () => {
 
     beforeEach(async () => {
-        // await deployments.fixture(['general_test_fixtures']);
+        await deployments.fixture(['fortunnaPool_test_fixture']);
         // const accounts = await getNamedAccounts();
         // [<some signers from accounts>] = await ethers.getSigners();
         

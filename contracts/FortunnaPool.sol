@@ -42,9 +42,9 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     uint256 public requestedRewardTokensToDistribute;
     uint256 public providedRewardTokensBalance;
 
-    uint256[] internal _accumulatedFees;
-
     mapping(address => UserInfo) public usersInfo;
+
+    uint256[] internal _accumulatedFees;
     FortunnaLib.PoolParametersArrays internal vectorParams;
 
     function initialize(
