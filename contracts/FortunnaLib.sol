@@ -71,7 +71,7 @@ library FortunnaLib {
     error TooMuchStaked(uint256 amount, uint256 limit);
 
     error DistributionEnded(uint256 timeDifference);
-    
+
     error DistributionNotStarted(uint256 timeDifference);
 
     error InvalidWeightedInput(uint256[] amounts);

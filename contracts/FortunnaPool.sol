@@ -21,7 +21,9 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     }
 
     enum Fee {
-        GET_REWARD, STAKE, WITHDRAW 
+        GET_REWARD,
+        STAKE,
+        WITHDRAW
     }
 
     FortunnaLib.PoolParameters public scalarParams;
@@ -81,7 +83,10 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     function _provideRewardTokens(uint256 amount) internal {
         amount += requestedRewardTokensToDistribute;
         if (providedRewardTokensBalance > amount) {
-            revert FortunnaLib.NotEnoughRewardToDistribute(providedRewardTokensBalance, requestedRewardTokensToDistribute);
+            revert FortunnaLib.NotEnoughRewardToDistribute(
+                providedRewardTokensBalance,
+                requestedRewardTokensToDistribute
+            );
         }
         requestedRewardTokensToDistribute = amount;
     }
@@ -105,19 +110,29 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
 
     function _checkTimeIntervals() internal view {
         if (block.timestamp < scalarParams.startTimestamp) {
-            revert FortunnaLib.DistributionNotStarted(scalarParams.startTimestamp - block.timestamp);
+            revert FortunnaLib.DistributionNotStarted(
+                scalarParams.startTimestamp - block.timestamp
+            );
         }
         if (block.timestamp > scalarParams.endTimestamp) {
-            revert FortunnaLib.DistributionEnded(block.timestamp - scalarParams.endTimestamp);
+            revert FortunnaLib.DistributionEnded(
+                block.timestamp - scalarParams.endTimestamp
+            );
         }
     }
 
     function stake(uint256 amount) external nonReentrant {
         if (amount > scalarParams.maxStakeAmount) {
-            revert FortunnaLib.TooMuchStaked(amount, scalarParams.maxStakeAmount);
+            revert FortunnaLib.TooMuchStaked(
+                amount,
+                scalarParams.maxStakeAmount
+            );
         }
         if (amount < scalarParams.minStakeAmount) {
-            revert FortunnaLib.NotEnoughStaked(amount, scalarParams.minStakeAmount);
+            revert FortunnaLib.NotEnoughStaked(
+                amount,
+                scalarParams.minStakeAmount
+            );
         }
         _checkTimeIntervals();
         address sender = _msgSender();
@@ -125,7 +140,8 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         _getReward();
         stakingToken.safeTransferFrom(sender, address(this), amount);
         if (scalarParams.depositWithdrawFeeBasePoints > 0) {
-            uint256 fee = amount * scalarParams.depositWithdrawFeeBasePoints / FortunnaLib.BASE_POINTS_MAX;
+            uint256 fee = (amount * scalarParams.depositWithdrawFeeBasePoints) /
+                FortunnaLib.BASE_POINTS_MAX;
             _accumulatedFees[uint256(Fee.STAKE)] += fee;
             amount -= fee;
         }
@@ -151,7 +167,8 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
             FortunnaLib.PRECISION;
         totalStakedTokensBalance -= amount;
         if (scalarParams.depositWithdrawFeeBasePoints > 0) {
-            uint256 fee = amount * scalarParams.depositWithdrawFeeBasePoints / FortunnaLib.BASE_POINTS_MAX;
+            uint256 fee = (amount * scalarParams.depositWithdrawFeeBasePoints) /
+                FortunnaLib.BASE_POINTS_MAX;
             _accumulatedFees[uint256(Fee.WITHDRAW)] += fee;
             amount -= fee;
         }
@@ -164,17 +181,20 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         UserInfo storage userInfo = usersInfo[sender];
         updatePool();
         uint256 pending = (userInfo.amount * accRewardTokenPerShare) /
-                FortunnaLib.PRECISION -
-                userInfo.rewardDebt;
+            FortunnaLib.PRECISION -
+            userInfo.rewardDebt;
         uint256 startTimestamp = scalarParams.startTimestamp;
 
         uint256 fee = 0;
         if (
-            pending > 0 
-            && block.timestamp > startTimestamp 
-            && block.timestamp < startTimestamp + scalarParams.minLockUpRewardsPeriod
+            pending > 0 &&
+            block.timestamp > startTimestamp &&
+            block.timestamp <
+            startTimestamp + scalarParams.minLockUpRewardsPeriod
         ) {
-            fee = pending * scalarParams.earlyWithdrawalFeeBasePoints / FortunnaLib.BASE_POINTS_MAX;
+            fee =
+                (pending * scalarParams.earlyWithdrawalFeeBasePoints) /
+                FortunnaLib.BASE_POINTS_MAX;
             _accumulatedFees[uint256(Fee.GET_REWARD)] += fee;
             pending -= fee;
         }
@@ -222,12 +242,19 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         }
     }
 
-    function addExpectedRewardTokensBalanceToDistribute(uint256 amount) external only(FortunnaLib.POOL_REWARDS_PROVIDER) {
+    function addExpectedRewardTokensBalanceToDistribute(
+        uint256 amount
+    ) external only(FortunnaLib.POOL_REWARDS_PROVIDER) {
         expectedRewardTokensBalanceToDistribute += amount;
-    } 
+    }
 
-    function providePartOfTotalRewards() external only(FortunnaLib.POOL_REWARDS_PROVIDER)  {
-        uint256 amount = expectedRewardTokensBalanceToDistribute * scalarParams.totalRewardBasePointsPerDistribution / FortunnaLib.BASE_POINTS_MAX;
+    function providePartOfTotalRewards()
+        external
+        only(FortunnaLib.POOL_REWARDS_PROVIDER)
+    {
+        uint256 amount = (expectedRewardTokensBalanceToDistribute *
+            scalarParams.totalRewardBasePointsPerDistribution) /
+            FortunnaLib.BASE_POINTS_MAX;
         rewardToken.safeTransferFrom(_msgSender(), address(this), amount);
         providedRewardTokensBalance += amount;
     }
@@ -235,7 +262,10 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     function _safeRewardTransfer(address to, uint256 amount) internal {
         if (amount == 0) return;
         if (amount > requestedRewardTokensToDistribute) {
-            IERC20(rewardToken).safeTransfer(to, requestedRewardTokensToDistribute);
+            IERC20(rewardToken).safeTransfer(
+                to,
+                requestedRewardTokensToDistribute
+            );
         } else {
             IERC20(rewardToken).safeTransfer(to, amount);
         }
