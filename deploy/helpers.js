@@ -4,8 +4,7 @@ const hre = require("hardhat");
 // Constants Starts
 ////////////////////////////////////////////
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-const skipDeploymentIfAlreadyDeployed = true;
+const skipIfAlreadyDeployed = true;
 
 ////////////////////////////////////////////
 // Constants Ends
@@ -47,18 +46,18 @@ const withImpersonatedSigner = async (signerAddress, action) => {
   });
 }
 
-const emptyStage = (message) => 
-  async ({deployments}) => {
+const emptyStage = (message) => {
+  return async ({deployments}) => {
       const {log} = deployments;
       log(message);
-  };
+  }
+};
 
 module.exports = {
   getMockToken,
-  skipDeploymentIfAlreadyDeployed,
+  skipIfAlreadyDeployed,
   withImpersonatedSigner,
   mintNativeTokens,
   getFakeDeployment,
-  ZERO_ADDRESS,
   emptyStage
 };

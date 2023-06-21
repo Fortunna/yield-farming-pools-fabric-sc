@@ -189,8 +189,9 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         if (
             pending > 0 &&
             block.timestamp > startTimestamp &&
-            block.timestamp <
-            startTimestamp + scalarParams.minLockUpRewardsPeriod
+            block.timestamp < startTimestamp 
+                + scalarParams.minLockUpRewardsPeriod &&
+            scalarParams.earlyWithdrawalFeeBasePoints > 0
         ) {
             fee =
                 (pending * scalarParams.earlyWithdrawalFeeBasePoints) /

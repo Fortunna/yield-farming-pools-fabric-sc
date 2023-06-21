@@ -40,11 +40,9 @@ interface IFortunnaFactory is INativeTokenReceivable {
     ) external;
 
     /// @notice The main public function. It is deploying the pool according to the pool parameters and it's prototype.
-    /// @param fortunnaTokenPrototypeIndex A FortunaToken prototype index to clone.
     /// @param poolParameters A scalar parameters for the pool.
     /// @param poolParametersArrays A vector parameters for the pool.
     function createPool(
-        uint256 fortunnaTokenPrototypeIndex,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external payable returns (address poolAddress);

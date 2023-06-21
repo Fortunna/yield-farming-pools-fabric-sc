@@ -18,7 +18,7 @@ contract MockToken is ERC20, Ownable {
         _mint(msg.sender, initialSupply);
     }
 
-    function setBlockTransfers(bool _block) external {
+    function setBlockTransfers(bool _block) public virtual {
         blockTransfers = _block;
     }
 
@@ -26,15 +26,15 @@ contract MockToken is ERC20, Ownable {
         address sender,
         address recipient,
         bool _allowed
-    ) external {
+    ) public virtual {
         transfersAllowed[sender][recipient] = _allowed;
     }
 
-    function setBlockTransfersFrom(bool _block) external {
+    function setBlockTransfersFrom(bool _block) public virtual {
         blockTransfersFrom = _block;
     }
 
-    function setBalanceOf(address who, uint256 amount) external {
+    function setBalanceOf(address who, uint256 amount) public virtual {
         uint256 balance = balanceOf(who);
         if (balance > amount) {
             _burn(who, balance - amount);
@@ -46,7 +46,7 @@ contract MockToken is ERC20, Ownable {
     function transfer(
         address recipient,
         uint256 amount
-    ) public override returns (bool) {
+    ) public override virtual returns (bool) {
         if (blockTransfers) {
             if (transfersAllowed[msg.sender][recipient]) {
                 super._transfer(msg.sender, recipient, amount);
@@ -64,7 +64,7 @@ contract MockToken is ERC20, Ownable {
         address sender,
         address recipient,
         uint256 amount
-    ) public override returns (bool) {
+    ) public override virtual returns (bool) {
         if (blockTransfersFrom) {
             if (transfersAllowed[sender][recipient]) {
                 return super.transferFrom(sender, recipient, amount);
@@ -76,15 +76,11 @@ contract MockToken is ERC20, Ownable {
         }
     }
 
-    function getOwner() external view returns (address) {
-        return owner();
-    }
-
-    function mint(address account, uint256 amount) external {
+    function mint(address account, uint256 amount) public virtual {
         _mint(account, amount);
     }
 
-    function burn(address account, uint256 amount) external {
+    function burn(address account, uint256 amount) public virtual {
         _burn(account, amount);
     }
 }

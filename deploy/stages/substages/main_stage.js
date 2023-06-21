@@ -1,5 +1,5 @@
 const hre = require('hardhat');
-const { skipDeploymentIfAlreadyDeployed } = require('../../helpers');
+const { skipIfAlreadyDeployed } = require('../../helpers');
 
 module.exports = async ({
   getNamedAccounts,
@@ -19,7 +19,7 @@ module.exports = async ({
 
   await deploy(hre.names.internal.fortunnaFactory, {
     from: deployer,
-    skipIfAlreadyDeployed: skipDeploymentIfAlreadyDeployed,
+    skipIfAlreadyDeployed,
     args: [
       fortunnaTokenPrototypeAddress,
       fortunnaPoolPrototypeAddress,

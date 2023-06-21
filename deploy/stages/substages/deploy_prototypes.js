@@ -1,37 +1,48 @@
 const hre = require('hardhat');
-const { skipDeploymentIfAlreadyDeployed } = require('../../helpers');
+const { skipIfAlreadyDeployed } = require('../../helpers');
 
 module.exports = async ({
   getNamedAccounts,
   deployments,
   network
 }) => {
-  const { log, deploy } = deployments;
+  const { log, deploy, get } = deployments;
   const { deployer } = await getNamedAccounts();
 
   await deploy(hre.names.internal.fortunnaLib, {
     from: deployer,
-    skipIfAlreadyDeployed: skipDeploymentIfAlreadyDeployed,
+    skipIfAlreadyDeployed,
     log: true
   });
 
   const libraries = {
-    FortunnaLib: (await deployments.get(hre.names.internal.fortunnaLib)).address 
+    FortunnaLib: (await get(hre.names.internal.fortunnaLib)).address 
   }
   log(`Acquired libaries settings: ${JSON.stringify(libraries)}`);
 
   await deploy(hre.names.internal.fortunnaPool, {
     from: deployer,
-    skipIfAlreadyDeployed: skipDeploymentIfAlreadyDeployed,
+    skipIfAlreadyDeployed,
     log: true,
     libraries
   });
 
   await deploy(hre.names.internal.fortunnaToken, {
     from: deployer,
-    skipIfAlreadyDeployed: skipDeploymentIfAlreadyDeployed,
+    skipIfAlreadyDeployed,
     log: true,
     libraries
+  });
+
+  await deploy(hre.names.internal.productionMockToken, {
+    from: deployer,
+    skipIfAlreadyDeployed,
+    log: true,
+    args: [
+      "Fortunna Test Token", 
+      "FTT", 
+      hre.ethers.utils.parseEther('100000')
+    ]
   });
 }
 module.exports.tags = ["deploy_prototypes", "prototypes"];

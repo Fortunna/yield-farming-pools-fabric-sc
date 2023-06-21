@@ -198,6 +198,8 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         }
     }
 
+    /// @dev Every income in native tokens should be recorded as the behaviour
+    /// of the contract would be a funds hub like.
     receive() external payable {
         emit NativeTokenReceived(msg.value);
     }

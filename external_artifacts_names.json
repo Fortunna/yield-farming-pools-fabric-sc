@@ -1,5 +1,4 @@
 {
-    "uniswapV3": {
-        "nftPositionManager": "NftPositionManager"
-    }
+    "weth": "WETH",
+    "nftPositionManager": "NftPositionManager"
 }

@@ -30,8 +30,6 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// @dev A set of unique deployed prototypes.
     EnumerableSet.AddressSet internal prototypes;
 
-    mapping(uint256 => address[2]) public getFortunnaToken;
-
     /// @notice A constructor.
     /// @param paymentTokens An array of tokens addresses to be allowed as payment for pool deploy tokens.
     constructor(
@@ -212,7 +210,6 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
 
     /// @inheritdoc IFortunnaFactory
     function createPool(
-        uint256 fortunnaTokenPrototypeIndex,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external payable override returns (address pool) {
@@ -226,6 +223,9 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             poolParametersArrays.utilizingTokens
         );
         _validateScalarParameters(poolParameters);
+
+        // depends on the addition process in initialization function
+        uint256 fortunnaTokenPrototypeIndex = 2;
 
         address prototypeAddress = prototypes.at(poolParameters.poolIdx);
         if (prototypeAddress == address(0)) {
