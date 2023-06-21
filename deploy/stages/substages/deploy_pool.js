@@ -12,7 +12,9 @@ module.exports = deployPoolWithParams(
     return {
       utilizingTokensAddresses: [productionMockTokenAddress, wethAddress],
       stakingTokensFlags: [true, true],
-      rewardTokensFlags: [true, false]
+      rewardTokensFlags: [true, false],
+      initialRewardAmounts: [[0, hre.ethers.utils.parseEther('10')]],
+      initialDepositAmounts: [[0, hre.ethers.constants.Zero], [1, hre.ethers.constants.Zero]]
     }
   }  
 );

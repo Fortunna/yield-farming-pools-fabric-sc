@@ -288,6 +288,27 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             poolParameters,
             poolParametersArrays
         );
+
+        uint256 i;
+        uint256 amountToMint = 0;
+        uint256[2] memory pair;
+        address token;
+
+        for (i = 0; i < poolParametersArrays.initialDepositAmounts.length; i++) {
+            pair = poolParametersArrays.initialDepositAmounts[i];
+            token = poolParametersArrays.utilizingTokens[pair[0]];
+            amountToMint += IFortunnaToken(stakingTokenAddress).calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
+        }
+
+        IFortunnaToken(stakingTokenAddress).mint(sender, amountToMint);
+        amountToMint = 0;
+
+        for (i = 0; i < poolParametersArrays.initialRewardAmounts.length; i++) {
+            pair = poolParametersArrays.initialRewardAmounts[i];
+            token = poolParametersArrays.utilizingTokens[pair[0]];
+            amountToMint += IFortunnaToken(rewardTokenAddress).calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
+        }
+        IFortunnaToken(rewardTokenAddress).mint(sender, amountToMint);
     }
 
     /// @inheritdoc IFortunnaFactory
