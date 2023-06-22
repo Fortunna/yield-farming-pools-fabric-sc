@@ -8,7 +8,7 @@ module.exports = deployPoolWithParams(
   0, 
   10,
   hre.ethers.utils.parseEther('0.1'), // min stake
-  hre.ethers.utils.parseEther('10'), // max stake
+  hre.ethers.utils.parseEther('9'), // max stake
   async ({
     deployments,
     getNamedAccounts
@@ -16,7 +16,7 @@ module.exports = deployPoolWithParams(
     const {get, execute} = deployments;
     const {deployer} = await getNamedAccounts();
     const wethAddress = (await get(hre.names.external.weth)).address;
-    const productionMockTokenAddress = (await get(hre.names.internal.productionMockToken)).address;
+    const productionMockTokenAddress = (await get(hre.names.internal.productionTestToken)).address;
 
     const rewardAmountInMockTokens = hre.ethers.utils.parseEther('5');
 
@@ -30,12 +30,14 @@ module.exports = deployPoolWithParams(
     );
 
     await execute(
-      hre.names.internal.productionMockToken,
+      hre.names.internal.productionTestToken,
       {from: deployer, log: true},
       'approve',
       rewardFortunnaTokenAddress,
       rewardAmountInMockTokens
     );
+    console.log("spending token", (await get(hre.names.internal.productionTestToken)).address);
+    console.log("spender", rewardFortunnaTokenAddress);
 
     return {
       utilizingTokensAddresses: [productionMockTokenAddress, wethAddress],

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.20;
 
-import "./MockToken.sol";
+import "./mock/MockToken.sol";
 
-contract ProductionMockToken is MockToken {
+contract ProductionTestToken is MockToken {
 
     constructor(
         string memory name,

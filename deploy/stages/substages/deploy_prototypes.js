@@ -34,7 +34,7 @@ module.exports = async ({
     libraries
   });
 
-  await deploy(hre.names.internal.productionMockToken, {
+  await deploy(hre.names.internal.productionTestToken, {
     from: deployer,
     skipIfAlreadyDeployed,
     log: true,

@@ -72,6 +72,13 @@ module.exports =
     const rewardTokensMask = await fortunnaFactoryInstance
       .generateMaskForInitialRewardAmountsPair(rewardTokensFlags);
 
+    const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
+      0, deployer, false
+    );
+    const [stakingFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
+      0, deployer, true
+    );
+
     await execute(
       hre.names.internal.fortunnaFactory,
       {from: deployer, log: true, value: POOL_DEPLOY_COST},
@@ -95,4 +102,22 @@ module.exports =
         initialDepositAmounts
       ]
     );
+
+    const rewardTokenInstance = await hre.ethers.getContractAt(
+      hre.names.internal.fortunnaToken,
+      rewardFortunnaTokenAddress
+    );
+
+    const stakingTokenInstance = await hre.ethers.getContractAt(
+      hre.names.internal.fortunnaToken,
+      stakingFortunnaTokenAddress
+    );
+
+    log('Starting FortunnaToken\'s reserves initialization...');
+    const rewardTokenReserveInitializationTxReceipt = await rewardTokenInstance.initializeReserves();
+    await rewardTokenReserveInitializationTxReceipt.wait();
+
+    const stakingTokenReserveInitializationTxReceipt = await stakingTokenInstance.initializeReserves();
+    await stakingTokenReserveInitializationTxReceipt.wait();
+    log(`Initialization of FortunnaToken\'s reserves finished.`);
   }

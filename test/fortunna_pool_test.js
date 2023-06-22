@@ -2,7 +2,7 @@ const hre = require("hardhat");
 const {
   withImpersonatedSigner, 
   mintNativeTokens, 
-  ZERO_ADDRESS,
+  DEAD_ADDRESS,
 } = require('../deploy/helpers');
 const {ethers, deployments, getNamedAccounts} = hre;
 

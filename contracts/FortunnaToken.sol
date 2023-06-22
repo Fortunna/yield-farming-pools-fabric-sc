@@ -15,6 +15,8 @@ import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./interfaces/IFortunnaPool.sol";
 
+import "hardhat/console.sol";
+
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
     using FortunnaLib for bytes32;
@@ -78,6 +80,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         for (uint256 i = 0; i < underlyingTokens.length; i++) {
             address token = underlyingTokens[i];
             uint256 reserve = getReserve[i];
+            console.log(address(this), token, reserve);
             if (reserve > 0) {
                 if (token == address(0)) {
                     if (msg.value != reserve) {
