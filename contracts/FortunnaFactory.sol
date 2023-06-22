@@ -12,8 +12,6 @@ import "./interfaces/IFortunnaFactory.sol";
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/IFortunnaToken.sol";
 
-import "hardhat/console.sol";
-
 /// @title Canonical Fortunna Yield Farming pools factory
 /// @author Fortunna Team
 /// @notice Deploys Fortunna Yield Farming pools and manages ownership and control over pool protocol fees.
@@ -43,6 +41,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         address _fortunnaPoolUniswapV3Prototype,
         address[] memory paymentTokens
     ) {
+        _grantRole(FortunnaLib.LP_MINTER_BURNER_ROLE, address(this));
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, address(0));
         prototypes.add(_fortunnaPoolPrototype);
@@ -118,7 +117,6 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             );
         }
         for (uint8 i = 0; i < utilizingTokens.length; i++) {
-            console.log("validating token ", i);
             address token = utilizingTokens[i];
             if (stakingTokensMask.isBitUp(i)) {
                 if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
@@ -263,28 +261,21 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
                 paymentInfo.cost
             );
         }
-        console.log("payed");
 
         bytes32 deploySalt;
         (pool, deploySalt) = predictPoolAddress(poolParameters.protoPoolIdx, sender);
-        
-        if (!pools.add(pool)) {
-            revert FortunnaLib.AddressAlreadyExists(pool);
-        }
-
-        console.log("pool predicted");
 
         (address stakingTokenAddress, bytes32 stakingTokenDeploySalt) = 
             predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, true);
+
         (address rewardTokenAddress, bytes32 rewardTokenDeploySalt) = 
             predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, false);
 
-        console.log("fortunna tokens predicted");
-
+        if (!pools.add(pool)) {
+            revert FortunnaLib.AddressAlreadyExists(pool);
+        }
         address prototypeAddress = prototypes.at(poolParameters.protoPoolIdx);
         address fortunnaTokenPrototype = prototypes.at(FORTUNNA_TOKEN_PROTO_INDEX);
-
-        console.log("start cloning");
 
         Clones.cloneDeterministic(prototypeAddress, deploySalt);
         Clones.cloneDeterministic(
@@ -296,15 +287,12 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             rewardTokenDeploySalt
         );
 
-        console.log("preinitialize pool");
         IFortunnaPool(pool).initialize(
-            sender,
             stakingTokenAddress,
             rewardTokenAddress,
             poolParameters,
             poolParametersArrays
         );
-        console.log("post pool");
 
         uint256 amountToMint = calculateFortunnaTokens(poolParametersArrays.initialDepositAmounts, stakingTokenAddress);
         if (amountToMint > 0) {

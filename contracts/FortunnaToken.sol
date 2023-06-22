@@ -15,8 +15,6 @@ import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./interfaces/IFortunnaPool.sol";
 
-import "hardhat/console.sol";
-
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
     using FortunnaLib for bytes32;
@@ -32,11 +30,10 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     constructor() ERC20("Fortunna Token", "FTA") {}
 
     function initialize(
-        address poolCreator,
         bool _stakingOrRewardTokens,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
-    ) external payable override initializer {
+    ) external override initializer {
         address sender = _msgSender();
         pool = sender;
         super._initialize(IFortunnaPool(sender).factory());
@@ -66,16 +63,28 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
                             .symbol(),
                         "x"
                     );
-                    IERC20(poolParametersArrays.utilizingTokens[i])
-                        .safeTransferFrom(poolCreator, address(this), initialReserve);
                 } else {
                     underlyingTokensSymbols = abi.encodePacked(
                         underlyingTokensSymbols,
                         "ETHx"
                     );
-                    if (msg.value != initialReserve) {
+                }
+            }
+        }
+    }
+
+    /// @inheritdoc IFortunnaToken
+    function initializeReserves() external override payable onlyAdmin {
+        for (uint256 i = 0; i < underlyingTokens.length; i++) {
+            address token = underlyingTokens[i];
+            uint256 reserve = getReserve[i];
+            if (reserve > 0) {
+                if (token == address(0)) {
+                    if (msg.value != reserve) {
                         revert FortunnaLib.NotEnoughtPayment(msg.value);
                     }
+                } else {
+                    IERC20(token).safeTransferFrom(_msgSender(), address(this), reserve);
                 }
             }
         }
