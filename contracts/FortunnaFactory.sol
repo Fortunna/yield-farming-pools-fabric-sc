@@ -228,6 +228,14 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         );
     }
 
+    function calculateFortunnaTokens(uint256[2][] memory initialDepositAmounts, address fortunnaTokenAddress) public view returns (uint256 amountToMint) {
+        for (uint256 i = 0; i < initialDepositAmounts.length; i++) {
+            uint256[2] memory pair = initialDepositAmounts[i];
+            if (pair[1] == 0) continue;
+            amountToMint += IFortunnaToken(fortunnaTokenAddress).calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
+        }
+    }
+
     /// @inheritdoc IFortunnaFactory
     function createPool(
         FortunnaLib.PoolParameters calldata poolParameters,
@@ -288,26 +296,16 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             poolParametersArrays
         );
 
-        uint256 i;
-        uint256 amountToMint = 0;
-        uint256[2] memory pair;
-        address token;
-
-        for (i = 0; i < poolParametersArrays.initialDepositAmounts.length; i++) {
-            pair = poolParametersArrays.initialDepositAmounts[i];
-            token = poolParametersArrays.utilizingTokens[pair[0]];
-            amountToMint += IFortunnaToken(stakingTokenAddress).calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
+        uint256 amountToMint = calculateFortunnaTokens(poolParametersArrays.initialDepositAmounts, stakingTokenAddress);
+        if (amountToMint > 0) {
+            IFortunnaToken(stakingTokenAddress).mint(sender, amountToMint);
+            amountToMint = 0;
         }
 
-        IFortunnaToken(stakingTokenAddress).mint(sender, amountToMint);
-        amountToMint = 0;
-
-        for (i = 0; i < poolParametersArrays.initialRewardAmounts.length; i++) {
-            pair = poolParametersArrays.initialRewardAmounts[i];
-            token = poolParametersArrays.utilizingTokens[pair[0]];
-            amountToMint += IFortunnaToken(rewardTokenAddress).calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
+        amountToMint = calculateFortunnaTokens(poolParametersArrays.initialRewardAmounts, rewardTokenAddress);
+        if (amountToMint > 0) {
+            IFortunnaToken(rewardTokenAddress).mint(sender, amountToMint);
         }
-        IFortunnaToken(rewardTokenAddress).mint(sender, amountToMint);
     }
 
     /// @inheritdoc IFortunnaFactory
