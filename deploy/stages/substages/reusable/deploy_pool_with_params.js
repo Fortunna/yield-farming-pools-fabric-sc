@@ -1,4 +1,6 @@
 const hre = require('hardhat');
+const keccak256 = require('keccak256');
+const { POOL_DEPLOY_COST } = require("../../../helpers");
 
 module.exports = 
   (
@@ -7,6 +9,8 @@ module.exports =
     earlyWithdrawalFeeBasePoints,
     depositWithdrawFeeBasePoints,
     totalRewardBasePointsPerDistribution,
+    minStake,
+    maxStake,
     getUtilizingTokensAndListsOfFlags
   ) => async (deployScriptParams) => {
     const {
@@ -32,9 +36,6 @@ module.exports =
     const startTimestamp = currentBlock.timestamp + 1;
     const endTimestamp = startTimestamp + poolFunctionalityDurationInSec;
 
-    const maxStake = hre.ethers.utils.parseEther('10');
-    const minStake = hre.ethers.utils.parseEther('0.1');
-
     const minLockUpRewardPeriodInSec = dayInSec * minLockUpRewardPeriodInDays;
 
     if (stakingTokensFlags.length != utilizingTokensAddresses.length) {
@@ -49,21 +50,34 @@ module.exports =
       (await get(hre.names.internal.fortunnaFactory)).address
     );
     
+    const grantRoles = async (flags, roleName) => {
+      for (let i = 0; i < stakingTokensFlags.length; i++) {
+        if (flags[i]) {
+          await execute(
+            hre.names.internal.fortunnaFactory,
+            {from: deployer, log: true},
+            'grantRole',
+            keccak256(roleName),
+            utilizingTokensAddresses[i]
+          )
+        }
+      }
+    }
+
+    await grantRoles(stakingTokensFlags, "ALLOWED_STAKING_TOKEN_ROLE");
+    await grantRoles(rewardTokensFlags, "ALLOWED_REWARD_TOKEN_ROLE");
+    
     const stakingTokensMask = await fortunnaFactoryInstance
       .generateMaskForInitialRewardAmountsPair(stakingTokensFlags);
     const rewardTokensMask = await fortunnaFactoryInstance
       .generateMaskForInitialRewardAmountsPair(rewardTokensFlags);
 
-    log(stakingTokensMask);
-    log(rewardTokensMask);
-
     await execute(
       hre.names.internal.fortunnaFactory,
-      {from: deployer, log: true},
+      {from: deployer, log: true, value: POOL_DEPLOY_COST},
       'createPool',
       [
-        1, // pool idx
-        1, // chain id
+        0, // pool prototype idx
         startTimestamp,
         endTimestamp,
         minStake,

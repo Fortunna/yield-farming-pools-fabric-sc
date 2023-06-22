@@ -1,5 +1,5 @@
 const hre = require('hardhat');
-const { skipIfAlreadyDeployed } = require('../../helpers');
+const { skipIfAlreadyDeployed, POOL_DEPLOY_COST, DEAD_ADDRESS } = require('../../helpers');
 
 module.exports = async ({
   getNamedAccounts,
@@ -13,7 +13,7 @@ module.exports = async ({
   const fortunnaTokenPrototypeAddress = (await get(hre.names.internal.fortunnaToken)).address;
 
   /// TO BE REDACTED
-  const fortunnaPoolUniswapV3PrototypeAddress = (await get(hre.names.internal.fortunnaPool)).address;
+  const fortunnaPoolUniswapV3PrototypeAddress = DEAD_ADDRESS;
   log('UNISWAP V3 POOL HAS NOT YET BEEN IMPLEMENTED.');
   /// TO BE REDACTED
 
@@ -37,8 +37,23 @@ module.exports = async ({
     'setPaymentInfo',
     [
       hre.ethers.constants.AddressZero,
-      hre.ethers.utils.parseEther('0.1')
+      POOL_DEPLOY_COST
     ]
   );
+
+  await deploy(hre.names.internal.productionMockToken, {
+    from: deployer,
+    skipIfAlreadyDeployed,
+    log: true,
+    args: [
+      "Fortunna Test Token", 
+      "FTT", 
+      hre.ethers.utils.parseEther('100000'),
+      [
+        (await get(hre.names.internal.fortunnaFactory)),
+        deployer
+      ]
+    ]
+  });
 }
 module.exports.tags = ["main_stage", "main"];

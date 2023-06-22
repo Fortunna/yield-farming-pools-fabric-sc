@@ -9,7 +9,7 @@ const {ethers, deployments, getNamedAccounts} = hre;
 describe("FortunnaPool", () => {
 
     beforeEach(async () => {
-        await deployments.fixture(['fortunnaPool_test_fixture']);
+        await deployments.fixture(['debug']);
         // const accounts = await getNamedAccounts();
         // [<some signers from accounts>] = await ethers.getSigners();
         

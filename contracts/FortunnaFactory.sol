@@ -12,6 +12,8 @@ import "./interfaces/IFortunnaFactory.sol";
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/IFortunnaToken.sol";
 
+import "hardhat/console.sol";
+
 /// @title Canonical Fortunna Yield Farming pools factory
 /// @author Fortunna Team
 /// @notice Deploys Fortunna Yield Farming pools and manages ownership and control over pool protocol fees.
@@ -116,6 +118,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             );
         }
         for (uint8 i = 0; i < utilizingTokens.length; i++) {
+            console.log("validating token ", i);
             address token = utilizingTokens[i];
             if (stakingTokensMask.isBitUp(i)) {
                 if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
@@ -159,20 +162,17 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     function _validateScalarParameters(
         FortunnaLib.PoolParameters calldata _poolParameters
     ) internal view {
-        if (_poolParameters.chainId != block.chainid) {
-            revert FortunnaLib.ForeignChainId(_poolParameters.chainId);
-        }
-        if (prototypes.at(_poolParameters.protoPoolIdx) != address(0)) {
+        if (prototypes.at(_poolParameters.protoPoolIdx) == address(0)) {
             revert FortunnaLib.UnknownPrototypeIndex(_poolParameters.protoPoolIdx);
         }
-        if (_poolParameters.startTimestamp <= _poolParameters.endTimestamp) {
+        if (_poolParameters.startTimestamp > _poolParameters.endTimestamp) {
             revert FortunnaLib.IncorrectInterval(
                 _poolParameters.startTimestamp,
                 _poolParameters.endTimestamp,
                 "time"
             );
         }
-        if (_poolParameters.minStakeAmount <= _poolParameters.maxStakeAmount) {
+        if (_poolParameters.minStakeAmount > _poolParameters.maxStakeAmount) {
             revert FortunnaLib.IncorrectInterval(
                 _poolParameters.minStakeAmount,
                 _poolParameters.maxStakeAmount,
@@ -263,6 +263,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
                 paymentInfo.cost
             );
         }
+        console.log("payed");
 
         bytes32 deploySalt;
         (pool, deploySalt) = predictPoolAddress(poolParameters.protoPoolIdx, sender);
@@ -271,13 +272,19 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             revert FortunnaLib.AddressAlreadyExists(pool);
         }
 
+        console.log("pool predicted");
+
         (address stakingTokenAddress, bytes32 stakingTokenDeploySalt) = 
             predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, true);
         (address rewardTokenAddress, bytes32 rewardTokenDeploySalt) = 
             predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, false);
 
+        console.log("fortunna tokens predicted");
+
         address prototypeAddress = prototypes.at(poolParameters.protoPoolIdx);
         address fortunnaTokenPrototype = prototypes.at(FORTUNNA_TOKEN_PROTO_INDEX);
+
+        console.log("start cloning");
 
         Clones.cloneDeterministic(prototypeAddress, deploySalt);
         Clones.cloneDeterministic(
@@ -289,12 +296,15 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             rewardTokenDeploySalt
         );
 
+        console.log("preinitialize pool");
         IFortunnaPool(pool).initialize(
+            sender,
             stakingTokenAddress,
             rewardTokenAddress,
             poolParameters,
             poolParametersArrays
         );
+        console.log("post pool");
 
         uint256 amountToMint = calculateFortunnaTokens(poolParametersArrays.initialDepositAmounts, stakingTokenAddress);
         if (amountToMint > 0) {

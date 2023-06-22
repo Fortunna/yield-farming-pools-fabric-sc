@@ -13,6 +13,7 @@ interface IFortunnaPool {
     function factory() external view returns (address);
 
     function initialize(
+        address poolCreator,
         address _stakingToken,
         address _rewardToken,
         FortunnaLib.PoolParameters calldata poolParameters,

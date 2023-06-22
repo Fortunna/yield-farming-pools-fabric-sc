@@ -34,7 +34,7 @@ contract ProductionMockToken is MockToken {
     function transfer(
         address recipient,
         uint256 amount
-    ) public override onlyOwner returns (bool) {
+    ) public override returns (bool) {
         return super.transfer(recipient, amount);
     }
 
@@ -42,7 +42,7 @@ contract ProductionMockToken is MockToken {
         address sender,
         address recipient,
         uint256 amount
-    ) public override onlyOwner returns (bool) {
+    ) public override returns (bool) {
         return super.transferFrom(sender, recipient, amount);
     }
 

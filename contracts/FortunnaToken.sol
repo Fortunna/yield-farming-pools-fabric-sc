@@ -15,6 +15,8 @@ import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./interfaces/IFortunnaPool.sol";
 
+import "hardhat/console.sol";
+
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
     using FortunnaLib for bytes32;
@@ -30,6 +32,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     constructor() ERC20("Fortunna Token", "FTA") {}
 
     function initialize(
+        address poolCreator,
         bool _stakingOrRewardTokens,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
@@ -39,7 +42,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         super._initialize(IFortunnaPool(sender).factory());
         isStakingOrRewardToken = _stakingOrRewardTokens;
         uint256 initialReserve;
-        _mint(address(0), 1e6); // to make mint/burn functions work and not to dry out entirely the liquidity.
+        _mint(FortunnaLib.DEAD_ADDRESS, 1e6); // to make mint/burn functions work and not to dry out entirely the liquidity.
         for (
             uint8 i = 0;
             i < poolParametersArrays.utilizingTokens.length;
@@ -64,7 +67,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
                         "x"
                     );
                     IERC20(poolParametersArrays.utilizingTokens[i])
-                        .safeTransferFrom(pool, address(this), initialReserve);
+                        .safeTransferFrom(poolCreator, address(this), initialReserve);
                 } else {
                     underlyingTokensSymbols = abi.encodePacked(
                         underlyingTokensSymbols,

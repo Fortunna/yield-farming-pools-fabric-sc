@@ -4,6 +4,7 @@ const hre = require("hardhat");
 // Constants Starts
 ////////////////////////////////////////////
 
+const DEAD_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 const skipIfAlreadyDeployed = true;
 
 ////////////////////////////////////////////
@@ -53,11 +54,15 @@ const emptyStage = (message) => {
   }
 };
 
+const POOL_DEPLOY_COST = hre.ethers.utils.parseEther('0.1');
+
 module.exports = {
   getMockToken,
   skipIfAlreadyDeployed,
   withImpersonatedSigner,
   mintNativeTokens,
   getFakeDeployment,
-  emptyStage
+  emptyStage,
+  POOL_DEPLOY_COST,
+  DEAD_ADDRESS
 };

@@ -48,6 +48,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     FortunnaLib.PoolParametersArrays internal vectorParams;
 
     function initialize(
+        address poolCreator,
         address _stakingToken,
         address _rewardToken,
         FortunnaLib.PoolParameters calldata poolParameters,
@@ -59,8 +60,8 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         super._initialize(__factory);
         stakingToken = IFortunnaToken(_stakingToken);
         rewardToken = IFortunnaToken(_rewardToken);
-        stakingToken.initialize(true, poolParameters, poolParametersArrays);
-        rewardToken.initialize(false, poolParameters, poolParametersArrays);
+        stakingToken.initialize(poolCreator, true, poolParameters, poolParametersArrays);
+        rewardToken.initialize(poolCreator, false, poolParameters, poolParametersArrays);
     }
 
     function pendingRewards(address user) external view returns (uint256) {

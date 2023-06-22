@@ -82,8 +82,6 @@ library FortunnaLib {
     struct PoolParameters {
         // An index of pool prototype in the factory list of prototypes.
         uint256 protoPoolIdx;
-        // Expected chaidId of chain deploying to.
-        uint256 chainId;
         // Start of the pool reward distribution period.
         uint256 startTimestamp;
         // End of the pool reward distribution period.
@@ -156,6 +154,9 @@ library FortunnaLib {
 
     /// @notice A given precision for math operations;
     uint256 public constant PRECISION = 1e10;
+
+    /// @notice A dead address for floor tokens to be minted
+    address public constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
     /// @dev A helper function to generate bit masks from boolean array.
     /// @param flags A boolean array.
