@@ -80,8 +80,8 @@ library FortunnaLib {
 
     /// @dev A struct to hold pools scalar deploy parameters.
     struct PoolParameters {
-        // An index of the pool in the factory list of pools.
-        uint256 poolIdx;
+        // An index of pool prototype in the factory list of prototypes.
+        uint256 protoPoolIdx;
         // Expected chaidId of chain deploying to.
         uint256 chainId;
         // Start of the pool reward distribution period.

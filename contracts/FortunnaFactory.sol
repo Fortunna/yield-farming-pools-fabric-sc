@@ -30,6 +30,9 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// @dev A set of unique deployed prototypes.
     EnumerableSet.AddressSet internal prototypes;
 
+    /// @dev An index in `prototypes` of FortunnaToken. Depends on the addition process in the initialization function.
+    uint256 public constant FORTUNNA_TOKEN_PROTO_INDEX = 2;
+
     /// @notice A constructor.
     /// @param paymentTokens An array of tokens addresses to be allowed as payment for pool deploy tokens.
     constructor(
@@ -159,11 +162,8 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         if (_poolParameters.chainId != block.chainid) {
             revert FortunnaLib.ForeignChainId(_poolParameters.chainId);
         }
-        if (_poolParameters.poolIdx != pools.length()) {
-            revert FortunnaLib.InvalidScalar(
-                _poolParameters.poolIdx,
-                "invalidNextIndex"
-            );
+        if (prototypes.at(_poolParameters.protoPoolIdx) != address(0)) {
+            revert FortunnaLib.UnknownPrototypeIndex(_poolParameters.protoPoolIdx);
         }
         if (_poolParameters.startTimestamp <= _poolParameters.endTimestamp) {
             revert FortunnaLib.IncorrectInterval(
@@ -208,6 +208,26 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         }
     }
 
+    function predictPoolAddress(uint256 poolProtoIdx, address poolOwner) public view returns (address result, bytes32 salt) {
+        address poolPrototypeAddress = prototypes.at(poolProtoIdx);
+        salt = keccak256(
+            abi.encodePacked(poolPrototypeAddress, poolOwner, pools.length())
+        );
+        result = Clones.predictDeterministicAddress(poolPrototypeAddress, salt);
+    }
+
+    function predictFortunnaTokenAddress(uint256 poolProtoIdx, address poolOwner, bool isStakingOrReward) public view returns (address result, bytes32 salt) {
+        address fortunnaTokenPrototype = prototypes.at(FORTUNNA_TOKEN_PROTO_INDEX);
+        (,bytes32 poolDeploySalt) = predictPoolAddress(poolProtoIdx, poolOwner);
+        salt = keccak256(
+            abi.encodePacked(poolDeploySalt, isStakingOrReward)
+        );
+        result = Clones.predictDeterministicAddress(
+            fortunnaTokenPrototype,
+            salt
+        );
+    }
+
     /// @inheritdoc IFortunnaFactory
     function createPool(
         FortunnaLib.PoolParameters calldata poolParameters,
@@ -224,14 +244,6 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         );
         _validateScalarParameters(poolParameters);
 
-        // depends on the addition process in initialization function
-        uint256 fortunnaTokenPrototypeIndex = 2;
-
-        address prototypeAddress = prototypes.at(poolParameters.poolIdx);
-        if (prototypeAddress == address(0)) {
-            revert FortunnaLib.UnknownPrototypeIndex(poolParameters.poolIdx);
-        }
-
         if (paymentInfo.paymentToken == address(0)) {
             if (msg.value < paymentInfo.cost) {
                 revert FortunnaLib.NotEnoughtPayment(msg.value);
@@ -244,33 +256,20 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             );
         }
 
-        bytes32 deploySalt = keccak256(
-            abi.encodePacked(prototypeAddress, sender, pools.length())
-        );
-        bytes32 stakingTokenDeploySalt = keccak256(
-            abi.encodePacked(deploySalt, bytes1(0x01))
-        );
-        bytes32 rewardTokenDeploySalt = keccak256(
-            abi.encodePacked(deploySalt, bytes1(0x02))
-        );
-
-        address fortunnaTokenPrototype = prototypes.at(
-            fortunnaTokenPrototypeIndex
-        );
-        pool = Clones.predictDeterministicAddress(prototypeAddress, deploySalt);
-
-        address stakingTokenAddress = Clones.predictDeterministicAddress(
-            fortunnaTokenPrototype,
-            stakingTokenDeploySalt
-        );
-        address rewardTokenAddress = Clones.predictDeterministicAddress(
-            fortunnaTokenPrototype,
-            rewardTokenDeploySalt
-        );
-
+        bytes32 deploySalt;
+        (pool, deploySalt) = predictPoolAddress(poolParameters.protoPoolIdx, sender);
+        
         if (!pools.add(pool)) {
             revert FortunnaLib.AddressAlreadyExists(pool);
         }
+
+        (address stakingTokenAddress, bytes32 stakingTokenDeploySalt) = 
+            predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, true);
+        (address rewardTokenAddress, bytes32 rewardTokenDeploySalt) = 
+            predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, false);
+
+        address prototypeAddress = prototypes.at(poolParameters.protoPoolIdx);
+        address fortunnaTokenPrototype = prototypes.at(FORTUNNA_TOKEN_PROTO_INDEX);
 
         Clones.cloneDeterministic(prototypeAddress, deploySalt);
         Clones.cloneDeterministic(
