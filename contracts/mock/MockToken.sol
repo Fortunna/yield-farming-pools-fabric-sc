@@ -46,7 +46,7 @@ contract MockToken is ERC20, Ownable {
     function transfer(
         address recipient,
         uint256 amount
-    ) public override virtual returns (bool) {
+    ) public virtual override returns (bool) {
         if (blockTransfers) {
             if (transfersAllowed[msg.sender][recipient]) {
                 super._transfer(msg.sender, recipient, amount);
@@ -64,7 +64,7 @@ contract MockToken is ERC20, Ownable {
         address sender,
         address recipient,
         uint256 amount
-    ) public override virtual returns (bool) {
+    ) public virtual override returns (bool) {
         if (blockTransfersFrom) {
             if (transfersAllowed[sender][recipient]) {
                 return super.transferFrom(sender, recipient, amount);

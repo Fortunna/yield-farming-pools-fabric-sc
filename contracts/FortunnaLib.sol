@@ -156,7 +156,8 @@ library FortunnaLib {
     uint256 public constant PRECISION = 1e10;
 
     /// @notice A dead address for floor tokens to be minted
-    address public constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+    address public constant DEAD_ADDRESS =
+        0x000000000000000000000000000000000000dEaD;
 
     /// @dev A helper function to generate bit masks from boolean array.
     /// @param flags A boolean array.

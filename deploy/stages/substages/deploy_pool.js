@@ -36,9 +36,7 @@ module.exports = deployPoolWithParams(
       rewardFortunnaTokenAddress,
       rewardAmountInMockTokens
     );
-    console.log("spending token", (await get(hre.names.internal.productionTestToken)).address);
-    console.log("spender", rewardFortunnaTokenAddress);
-
+    
     return {
       utilizingTokensAddresses: [productionMockTokenAddress, wethAddress],
       stakingTokensFlags: [true, true],

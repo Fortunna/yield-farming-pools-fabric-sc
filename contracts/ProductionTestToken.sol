@@ -4,14 +4,13 @@ pragma solidity 0.8.20;
 import "./mock/MockToken.sol";
 
 contract ProductionTestToken is MockToken {
-
     constructor(
         string memory name,
         string memory symbol,
         uint256 initialSupply
     ) MockToken(name, symbol, initialSupply) {}
 
-    function setBlockTransfers(bool _block) public onlyOwner override {
+    function setBlockTransfers(bool _block) public override onlyOwner {
         super.setBlockTransfers(_block);
     }
 
@@ -19,7 +18,7 @@ contract ProductionTestToken is MockToken {
         address sender,
         address recipient,
         bool _allowed
-    ) public onlyOwner override {
+    ) public override onlyOwner {
         super.setTransfersAllowed(sender, recipient, _allowed);
     }
 
@@ -27,7 +26,10 @@ contract ProductionTestToken is MockToken {
         super.setBlockTransfersFrom(_block);
     }
 
-    function setBalanceOf(address who, uint256 amount) public override onlyOwner {
+    function setBalanceOf(
+        address who,
+        uint256 amount
+    ) public override onlyOwner {
         super.setBalanceOf(who, amount);
     }
 

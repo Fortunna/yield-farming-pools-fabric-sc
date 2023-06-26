@@ -8,6 +8,8 @@ import "./INativeTokenReceivable.sol";
 /// @author Fortunna Team
 /// @notice The Fortunna Yield Faming pools factory facilitates creation of Fortunna pools and control over the protocol fees.
 interface IFortunnaFactory is INativeTokenReceivable {
+    event PoolCreated(address indexed pool);
+
     /// @notice A getter function to acquire the payment info for one pool deploy.
     /// @return token An address of the token to be held as payment asset.
     /// @return cost An actual cost of the pool deploy.

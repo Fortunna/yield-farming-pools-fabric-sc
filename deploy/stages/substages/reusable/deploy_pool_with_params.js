@@ -79,10 +79,7 @@ module.exports =
       0, deployer, true
     );
 
-    await execute(
-      hre.names.internal.fortunnaFactory,
-      {from: deployer, log: true, value: POOL_DEPLOY_COST},
-      'createPool',
+    const createPoolTxReceipt = await fortunnaFactoryInstance.createPool(
       [
         0, // pool prototype idx
         startTimestamp,
@@ -100,24 +97,54 @@ module.exports =
         utilizingTokensAddresses,
         initialRewardAmounts,
         initialDepositAmounts
-      ]
+      ],
+      {
+        value: POOL_DEPLOY_COST
+      }
     );
+    await createPoolTxReceipt.wait();
+
+    const poolCreatedFilter = fortunnaFactoryInstance.filters.PoolCreated();
+    const filterQueryResult = await fortunnaFactoryInstance.queryFilter(poolCreatedFilter);
+    const poolAddress = filterQueryResult[0].args.pool;
+
+    log(`Acquired pool address from the factory: ${poolAddress}`);
 
     const rewardTokenInstance = await hre.ethers.getContractAt(
       hre.names.internal.fortunnaToken,
       rewardFortunnaTokenAddress
     );
-
+    
     const stakingTokenInstance = await hre.ethers.getContractAt(
       hre.names.internal.fortunnaToken,
       stakingFortunnaTokenAddress
     );
 
-    log('Starting FortunnaToken\'s reserves initialization...');
-    const rewardTokenReserveInitializationTxReceipt = await rewardTokenInstance.initializeReserves();
-    await rewardTokenReserveInitializationTxReceipt.wait();
+    const approveMaxAndReturnBalance = async (fortunnaToken, typeOfFortunnaToken) => {
+      const fortunnaTokenBalance = await fortunnaToken.balanceOf(deployer);
+      log(`Balance of fortunna token (${typeOfFortunnaToken}) acquired: ${hre.ethers.utils.formatUnits(fortunnaTokenBalance)}`);
+      if ((await fortunnaToken.allowance(deployer, poolAddress)).eq(hre.ethers.constants.Zero)) {
+        log('Allowance is lower than needed, approving the sum: 2**256...');
+        const fortunnaTokenApproveTxReceipt = await fortunnaToken.approve(poolAddress, hre.ethers.constants.MaxUint256);
+        await fortunnaTokenApproveTxReceipt.wait();
+      }
+      return fortunnaTokenBalance;
+    }
 
-    const stakingTokenReserveInitializationTxReceipt = await stakingTokenInstance.initializeReserves();
-    await stakingTokenReserveInitializationTxReceipt.wait();
-    log(`Initialization of FortunnaToken\'s reserves finished.`);
+    await approveMaxAndReturnBalance(stakingTokenInstance, "staking");
+    const rewardTokenBalance = await approveMaxAndReturnBalance(rewardTokenInstance, "reward");
+
+    const poolInstance = await hre.ethers.getContractAt(
+      hre.names.internal.fortunnaPool,
+      poolAddress
+    );
+
+    log('Providing the rewards for the pool...');
+    const addExpectedRewardTxReceipt = await poolInstance
+      .addExpectedRewardTokensBalanceToDistribute(rewardTokenBalance);
+    await addExpectedRewardTxReceipt.wait();
+
+    const providePartOfTotalRewardsTxReceipt = await poolInstance
+      .providePartOfTotalRewards();
+    await providePartOfTotalRewardsTxReceipt.wait();
   }

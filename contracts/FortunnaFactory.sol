@@ -41,8 +41,10 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         address _fortunnaPoolUniswapV3Prototype,
         address[] memory paymentTokens
     ) {
+        address sender = _msgSender();
         _grantRole(FortunnaLib.LP_MINTER_BURNER_ROLE, address(this));
-        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, sender);
+        _grantRole(FortunnaLib.POOL_REWARDS_PROVIDER, sender);
         _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, address(0));
         prototypes.add(_fortunnaPoolPrototype);
         prototypes.add(_fortunnaPoolUniswapV3Prototype);
@@ -161,7 +163,9 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         FortunnaLib.PoolParameters calldata _poolParameters
     ) internal view {
         if (prototypes.at(_poolParameters.protoPoolIdx) == address(0)) {
-            revert FortunnaLib.UnknownPrototypeIndex(_poolParameters.protoPoolIdx);
+            revert FortunnaLib.UnknownPrototypeIndex(
+                _poolParameters.protoPoolIdx
+            );
         }
         if (_poolParameters.startTimestamp > _poolParameters.endTimestamp) {
             revert FortunnaLib.IncorrectInterval(
@@ -206,7 +210,10 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         }
     }
 
-    function predictPoolAddress(uint256 poolProtoIdx, address poolOwner) public view returns (address result, bytes32 salt) {
+    function predictPoolAddress(
+        uint256 poolProtoIdx,
+        address poolOwner
+    ) public view returns (address result, bytes32 salt) {
         address poolPrototypeAddress = prototypes.at(poolProtoIdx);
         salt = keccak256(
             abi.encodePacked(poolPrototypeAddress, poolOwner, pools.length())
@@ -214,23 +221,34 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         result = Clones.predictDeterministicAddress(poolPrototypeAddress, salt);
     }
 
-    function predictFortunnaTokenAddress(uint256 poolProtoIdx, address poolOwner, bool isStakingOrReward) public view returns (address result, bytes32 salt) {
-        address fortunnaTokenPrototype = prototypes.at(FORTUNNA_TOKEN_PROTO_INDEX);
-        (,bytes32 poolDeploySalt) = predictPoolAddress(poolProtoIdx, poolOwner);
-        salt = keccak256(
-            abi.encodePacked(poolDeploySalt, isStakingOrReward)
+    function predictFortunnaTokenAddress(
+        uint256 poolProtoIdx,
+        address poolOwner,
+        bool isStakingOrReward
+    ) public view returns (address result, bytes32 salt) {
+        address fortunnaTokenPrototype = prototypes.at(
+            FORTUNNA_TOKEN_PROTO_INDEX
         );
+        (, bytes32 poolDeploySalt) = predictPoolAddress(
+            poolProtoIdx,
+            poolOwner
+        );
+        salt = keccak256(abi.encodePacked(poolDeploySalt, isStakingOrReward));
         result = Clones.predictDeterministicAddress(
             fortunnaTokenPrototype,
             salt
         );
     }
 
-    function calculateFortunnaTokens(uint256[2][] memory initialDepositAmounts, address fortunnaTokenAddress) public view returns (uint256 amountToMint) {
+    function calculateFortunnaTokens(
+        uint256[2][] memory initialDepositAmounts,
+        address fortunnaTokenAddress
+    ) public view returns (uint256 amountToMint) {
         for (uint256 i = 0; i < initialDepositAmounts.length; i++) {
             uint256[2] memory pair = initialDepositAmounts[i];
             if (pair[1] == 0) continue;
-            amountToMint += IFortunnaToken(fortunnaTokenAddress).calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
+            amountToMint += IFortunnaToken(fortunnaTokenAddress)
+                .calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
         }
     }
 
@@ -263,19 +281,36 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         }
 
         bytes32 deploySalt;
-        (pool, deploySalt) = predictPoolAddress(poolParameters.protoPoolIdx, sender);
+        (pool, deploySalt) = predictPoolAddress(
+            poolParameters.protoPoolIdx,
+            sender
+        );
 
-        (address stakingTokenAddress, bytes32 stakingTokenDeploySalt) = 
-            predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, true);
+        (
+            address stakingTokenAddress,
+            bytes32 stakingTokenDeploySalt
+        ) = predictFortunnaTokenAddress(
+                poolParameters.protoPoolIdx,
+                sender,
+                true
+            );
 
-        (address rewardTokenAddress, bytes32 rewardTokenDeploySalt) = 
-            predictFortunnaTokenAddress(poolParameters.protoPoolIdx, sender, false);
+        (
+            address rewardTokenAddress,
+            bytes32 rewardTokenDeploySalt
+        ) = predictFortunnaTokenAddress(
+                poolParameters.protoPoolIdx,
+                sender,
+                false
+            );
 
         if (!pools.add(pool)) {
             revert FortunnaLib.AddressAlreadyExists(pool);
         }
         address prototypeAddress = prototypes.at(poolParameters.protoPoolIdx);
-        address fortunnaTokenPrototype = prototypes.at(FORTUNNA_TOKEN_PROTO_INDEX);
+        address fortunnaTokenPrototype = prototypes.at(
+            FORTUNNA_TOKEN_PROTO_INDEX
+        );
 
         Clones.cloneDeterministic(prototypeAddress, deploySalt);
         Clones.cloneDeterministic(
@@ -294,16 +329,24 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             poolParametersArrays
         );
 
-        uint256 amountToMint = calculateFortunnaTokens(poolParametersArrays.initialDepositAmounts, stakingTokenAddress);
+        uint256 amountToMint = calculateFortunnaTokens(
+            poolParametersArrays.initialDepositAmounts,
+            stakingTokenAddress
+        );
         if (amountToMint > 0) {
             IFortunnaToken(stakingTokenAddress).mint(sender, amountToMint);
             amountToMint = 0;
         }
 
-        amountToMint = calculateFortunnaTokens(poolParametersArrays.initialRewardAmounts, rewardTokenAddress);
+        amountToMint = calculateFortunnaTokens(
+            poolParametersArrays.initialRewardAmounts,
+            rewardTokenAddress
+        );
         if (amountToMint > 0) {
             IFortunnaToken(rewardTokenAddress).mint(sender, amountToMint);
         }
+
+        emit PoolCreated(pool);
     }
 
     /// @inheritdoc IFortunnaFactory

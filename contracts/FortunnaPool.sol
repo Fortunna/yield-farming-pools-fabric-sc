@@ -189,8 +189,8 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         if (
             pending > 0 &&
             block.timestamp > startTimestamp &&
-            block.timestamp < startTimestamp 
-                + scalarParams.minLockUpRewardsPeriod &&
+            block.timestamp <
+            startTimestamp + scalarParams.minLockUpRewardsPeriod &&
             scalarParams.earlyWithdrawalFeeBasePoints > 0
         ) {
             fee =
@@ -247,6 +247,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         uint256 amount
     ) external only(FortunnaLib.POOL_REWARDS_PROVIDER) {
         expectedRewardTokensBalanceToDistribute += amount;
+        emit RewardAdded(amount);
     }
 
     function providePartOfTotalRewards()
@@ -258,6 +259,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
             FortunnaLib.BASE_POINTS_MAX;
         rewardToken.safeTransferFrom(_msgSender(), address(this), amount);
         providedRewardTokensBalance += amount;
+        emit PartDistributed(amount);
     }
 
     function _safeRewardTransfer(address to, uint256 amount) internal {

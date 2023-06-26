@@ -28,5 +28,5 @@ interface IFortunnaToken is IERC20, IERC20Metadata, INativeTokenReceivable {
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external;
 
-    function initializeReserves() external payable;
+    function initializeReserves(uint256[] memory reserves) external payable;
 }

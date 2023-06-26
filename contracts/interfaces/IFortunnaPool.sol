@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import "../FortunnaLib.sol";
 
 interface IFortunnaPool {
+    event PartDistributed(uint256 partOfTotalRewards);
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);

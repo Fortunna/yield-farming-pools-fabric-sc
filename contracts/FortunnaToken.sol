@@ -15,8 +15,6 @@ import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./interfaces/IFortunnaPool.sol";
 
-import "hardhat/console.sol";
-
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
     using FortunnaLib for bytes32;
@@ -40,18 +38,13 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         pool = sender;
         super._initialize(IFortunnaPool(sender).factory());
         isStakingOrRewardToken = _stakingOrRewardTokens;
-        uint256 initialReserve;
-        _mint(FortunnaLib.DEAD_ADDRESS, 1e6); // to make mint/burn functions work and not to dry out entirely the liquidity.
+        _mint(FortunnaLib.DEAD_ADDRESS, 1 ether); // to make mint/burn functions work and not to dry out entirely the liquidity.
         for (
             uint8 i = 0;
             i < poolParametersArrays.utilizingTokens.length;
             i++
         ) {
-            initialReserve = _getInitialAmountOfUnderlyingToken(
-                poolParametersArrays.initialRewardAmounts,
-                i
-            );
-            getReserve[i] = initialReserve;
+            getReserve[i] = 1;
             if (
                 _stakingOrRewardTokens
                     ? poolParameters.stakingTokensMask.isBitUp(i)
@@ -76,18 +69,23 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     }
 
     /// @inheritdoc IFortunnaToken
-    function initializeReserves() external override payable onlyAdmin {
+    function initializeReserves(
+        uint256[] memory reserves
+    ) external payable override onlyAdmin {
         for (uint256 i = 0; i < underlyingTokens.length; i++) {
             address token = underlyingTokens[i];
-            uint256 reserve = getReserve[i];
-            console.log(address(this), token, reserve);
+            uint256 reserve = reserves[i];
             if (reserve > 0) {
                 if (token == address(0)) {
                     if (msg.value != reserve) {
                         revert FortunnaLib.NotEnoughtPayment(msg.value);
                     }
                 } else {
-                    IERC20(token).safeTransferFrom(_msgSender(), address(this), reserve);
+                    IERC20(token).safeTransferFrom(
+                        _msgSender(),
+                        address(this),
+                        reserve
+                    );
                 }
             }
         }
@@ -149,7 +147,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
 
     function mint(
         address user,
-        uint256 amount
+        uint256 amountToMint
     ) external payable override delegatedOnly {
         if (!isStakingOrRewardToken) {
             _onlyRoleInFactory(FortunnaLib.LP_MINTER_BURNER_ROLE);
@@ -157,7 +155,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         for (uint256 i = 0; i < underlyingTokens.length; i++) {
             uint256 amountIn = calcUnderlyingTokensInOrOutPerFortunnaToken(
                 i,
-                amount
+                amountToMint
             );
             if (underlyingTokens[i] != address(0)) {
                 IERC20(underlyingTokens[i]).safeTransferFrom(
@@ -166,13 +164,13 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
                     amountIn
                 );
             } else {
-                if (amountIn != msg.value) {
+                if (amountIn > msg.value) {
                     revert FortunnaLib.NotEnoughtPayment(amountIn);
                 }
             }
             getReserve[i] += amountIn;
         }
-        _mint(user, amount);
+        _mint(user, amountToMint);
     }
 
     function burn(
