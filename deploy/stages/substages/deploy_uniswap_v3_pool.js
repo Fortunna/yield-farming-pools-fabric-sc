@@ -21,7 +21,7 @@ module.exports = deployPoolWithParams(
     const wethAddress = (await get(hre.names.external.weth)).address;
     const productionMockTokenAddress = (await get(hre.names.internal.productionTestToken)).address;
 
-    const rewardAmountInMockTokens = hre.ethers.utils.parseEther('5');
+    const rewardAmountInMockTokens = hre.ethers.utils.parseEther('6');
 
     const fortunnaFactoryInstance = await hre.ethers.getContractAt(
       hre.names.internal.fortunnaFactory,
@@ -29,7 +29,7 @@ module.exports = deployPoolWithParams(
     );
 
     const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
-      2, deployer, false
+      1, deployer, true
     );
 
     await execute(
