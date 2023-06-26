@@ -89,9 +89,9 @@ contract FortunnaPoolUniswapV3 is
         uint256 amount1
     )
         external
+        delegatedOnly 
         whenNotPaused
         nonReentrant
-        delegatedOnly 
         onlyRole(DEFAULT_ADMIN_ROLE)
         updateReward(_msgSender())
     {
@@ -152,9 +152,9 @@ contract FortunnaPoolUniswapV3 is
     /// @dev There are no fees on the reward.
     function getReward()
         public
+        delegatedOnly 
         whenNotPaused
         nonReentrant
-        delegatedOnly 
         updateReward(_msgSender())
     {
         address sender = _msgSender();
