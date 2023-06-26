@@ -17,7 +17,7 @@ import "./interfaces/IFortunnaToken.sol";
 /// @notice Deploys Fortunna Yield Farming pools and manages ownership and control over pool protocol fees.
 contract FortunnaFactory is AccessControl, IFortunnaFactory {
     using SafeERC20 for IERC20;
-    using FortunnaLib for bytes32;
+    using FortunnaBitMaskLib for bytes32;
     using Clones for address;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -92,7 +92,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     function generateMaskForInitialRewardAmountsPair(
         bool[] calldata flags
     ) external pure override returns (bytes32) {
-        return FortunnaLib.getMaskFromBooleans(flags);
+        return FortunnaBitMaskLib.getMaskFromBooleans(flags);
     }
 
     /// @dev An internal function that validates the addresses if they're allowed

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.6 <=0.8.20;
 
+import "../libraries/FortunnaErrorsLib.sol";
+import "../libraries/FortunnaBitMaskLib.sol";
 import "../libraries/FortunnaLib.sol";
 import "./INativeTokenReceivable.sol";
 

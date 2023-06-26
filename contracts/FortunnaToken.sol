@@ -9,13 +9,15 @@ import "@openzeppelin/contracts-new/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts-new/access/IAccessControl.sol";
 import "@openzeppelin/contracts-new/utils/Address.sol";
 
+import "./libraries/FortunnaErrorsLib.sol";
+import "./libraries/FortunnaBitMaskLib.sol";
 import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./interfaces/IFortunnaPool.sol";
 
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
-    using FortunnaLib for bytes32;
+    using FortunnaBitMaskLib for bytes32;
     using Address for address payable;
 
     bool public isStakingOrRewardToken;

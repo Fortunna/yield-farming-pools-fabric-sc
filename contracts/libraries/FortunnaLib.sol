@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.6 <=0.8.20;
 
-import "./FortunnaErrorsLib.sol";
-
 /// @title Canonical Fortunna Yield Farming pools lib
 /// @author Fortunna Team
 /// @notice A lib holding default errors, helpers functions and constants.
@@ -87,30 +85,4 @@ library FortunnaLib {
     /// @notice A dead address for floor tokens to be minted
     address public constant DEAD_ADDRESS =
         0x000000000000000000000000000000000000dEaD;
-
-    /// @dev A helper function to generate bit masks from boolean array.
-    /// @param flags A boolean array.
-    function getMaskFromBooleans(
-        bool[] calldata flags
-    ) internal pure returns (bytes32 result) {
-        if (flags.length > 256) {
-            revert FortunnaErrorsLib.InvalidLength(flags.length, "flagsLength>256");
-        }
-        for (uint256 i = 0; i < flags.length; i++) {
-            if (flags[i]) {
-                result |= bytes32(i == 0 ? 1 : 1 << i);
-            }
-        }
-    }
-
-    /// @dev A helper function to check if some bit is up in the mask.
-    /// @param mask A mask to be checked.
-    /// @param index An index of the bit to be checked.
-    function isBitUp(
-        bytes32 mask,
-        uint8 index
-    ) internal pure returns (bool result) {
-        uint256 counter = index == 0 ? 1 : 1 << index;
-        return bytes32(counter) == mask & bytes32(counter);
-    }
 }
