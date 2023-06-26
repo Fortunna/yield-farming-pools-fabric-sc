@@ -1,6 +1,5 @@
 const hre = require('hardhat');
-const keccak256 = require('keccak256');
-const { POOL_DEPLOY_COST } = require("../../../helpers");
+const { POOL_DEPLOY_COST, grantRoles, getEventBody, approveMaxAndReturnBalance } = require("../../../helpers");
 
 module.exports = 
   (
@@ -49,23 +48,21 @@ module.exports =
       hre.names.internal.fortunnaFactory,
       (await get(hre.names.internal.fortunnaFactory)).address
     );
-    
-    const grantRoles = async (flags, roleName) => {
-      for (let i = 0; i < stakingTokensFlags.length; i++) {
-        if (flags[i]) {
-          await execute(
-            hre.names.internal.fortunnaFactory,
-            {from: deployer, log: true},
-            'grantRole',
-            keccak256(roleName),
-            utilizingTokensAddresses[i]
-          )
-        }
-      }
-    }
 
-    await grantRoles(stakingTokensFlags, "ALLOWED_STAKING_TOKEN_ROLE");
-    await grantRoles(rewardTokensFlags, "ALLOWED_REWARD_TOKEN_ROLE");
+    await grantRoles(
+      utilizingTokensAddresses, 
+      stakingTokensFlags, 
+      "ALLOWED_STAKING_TOKEN_ROLE",
+      deployer,
+      execute
+    );
+    await grantRoles(
+      utilizingTokensAddresses, 
+      rewardTokensFlags, 
+      "ALLOWED_REWARD_TOKEN_ROLE",
+      deployer,
+      execute
+    );
     
     const stakingTokensMask = await fortunnaFactoryInstance
       .generateMaskForInitialRewardAmountsPair(stakingTokensFlags);
@@ -103,13 +100,6 @@ module.exports =
       }
     );
     await createPoolTxReceipt.wait();
-
-    const getEventBody = async (eventName, contractInstance) => {
-      const filter = contractInstance.filters[eventName]();
-      const filterQueryResult = await contractInstance.queryFilter(filter);
-      return filterQueryResult[0].args;
-    }
-    
     
     const poolAddress = (await getEventBody("PoolCreated", fortunnaFactoryInstance)).pool;
     log(`Acquired pool address from the factory: ${poolAddress}`);
@@ -124,19 +114,20 @@ module.exports =
       stakingFortunnaTokenAddress
     );
 
-    const approveMaxAndReturnBalance = async (fortunnaToken, typeOfFortunnaToken) => {
-      const fortunnaTokenBalance = await fortunnaToken.balanceOf(deployer);
-      log(`Balance of fortunna token (${typeOfFortunnaToken}) acquired: ${hre.ethers.utils.formatUnits(fortunnaTokenBalance)}`);
-      if ((await fortunnaToken.allowance(deployer, poolAddress)).eq(hre.ethers.constants.Zero)) {
-        log('Allowance is lower than needed, approving the sum: 2**256...');
-        const fortunnaTokenApproveTxReceipt = await fortunnaToken.approve(poolAddress, hre.ethers.constants.MaxUint256);
-        await fortunnaTokenApproveTxReceipt.wait();
-      }
-      return fortunnaTokenBalance;
-    }
-
-    await approveMaxAndReturnBalance(stakingTokenInstance, "staking");
-    const rewardTokenBalance = await approveMaxAndReturnBalance(rewardTokenInstance, "reward");
+    await approveMaxAndReturnBalance(
+      stakingTokenInstance, 
+      "staking", 
+      deployer,
+      poolAddress,
+      log
+    );
+    const rewardTokenBalance = await approveMaxAndReturnBalance(
+      rewardTokenInstance, 
+      "reward",
+      deployer,
+      poolAddress,
+      log
+    );
 
     const poolInstance = await hre.ethers.getContractAt(
       hre.names.internal.fortunnaPool,
@@ -147,7 +138,7 @@ module.exports =
     const addExpectedRewardTxReceipt = await poolInstance
       .addExpectedRewardTokensBalanceToDistribute(rewardTokenBalance);
     await addExpectedRewardTxReceipt.wait();
-    log(`Total reword amount: ${hre.ethers.utils.formatUnits((await getEventBody("RewardAdded", poolInstance)).reward)}`);
+    log(`Total reward amount: ${hre.ethers.utils.formatUnits((await getEventBody("RewardAdded", poolInstance)).reward)}`);
 
     const providePartOfTotalRewardsTxReceipt = await poolInstance
       .providePartOfTotalRewards();

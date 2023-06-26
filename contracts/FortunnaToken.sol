@@ -38,7 +38,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         pool = sender;
         super._initialize(IFortunnaPool(sender).factory());
         isStakingOrRewardToken = _stakingOrRewardTokens;
-        _mint(FortunnaLib.DEAD_ADDRESS, 1 ether); // to make mint/burn functions work and not to dry out entirely the liquidity.
+        _mint(FortunnaLib.DEAD_ADDRESS, 1); // to make mint/burn functions work and not to dry out entirely the liquidity.
         for (
             uint8 i = 0;
             i < poolParametersArrays.utilizingTokens.length;

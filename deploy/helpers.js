@@ -1,4 +1,5 @@
 const hre = require("hardhat");
+const keccak256 = require("keccak256");
 
 ////////////////////////////////////////////
 // Constants Starts
@@ -54,6 +55,43 @@ const emptyStage = (message) => {
   }
 };
 
+const getEventBody = async (eventName, contractInstance) => {
+  const filter = contractInstance.filters[eventName]();
+  const filterQueryResult = await contractInstance.queryFilter(filter);
+  return filterQueryResult[0].args;
+}
+
+const grantRoles = async (
+  utilizingTokensAddresses, 
+  rolesFlags, 
+  roleName, 
+  deployer, 
+  execute
+) => {
+  for (let i = 0; i < rolesFlags.length; i++) {
+    if (rolesFlags[i]) {
+      await execute(
+        hre.names.internal.fortunnaFactory,
+        {from: deployer, log: true},
+        'grantRole',
+        keccak256(roleName),
+        utilizingTokensAddresses[i]
+      )
+    }
+  }
+}
+
+const approveMaxAndReturnBalance = async (fortunnaToken, typeOfFortunnaToken, deployer, poolAddress, log) => {
+  const fortunnaTokenBalance = await fortunnaToken.balanceOf(deployer);
+  log(`Balance of fortunna token (${typeOfFortunnaToken}) acquired: ${hre.ethers.utils.formatUnits(fortunnaTokenBalance)}`);
+  if ((await fortunnaToken.allowance(deployer, poolAddress)).eq(hre.ethers.constants.Zero)) {
+    log('Allowance is lower than needed, approving the sum: 2**256...');
+    const fortunnaTokenApproveTxReceipt = await fortunnaToken.approve(poolAddress, hre.ethers.constants.MaxUint256);
+    await fortunnaTokenApproveTxReceipt.wait();
+  }
+  return fortunnaTokenBalance;
+}
+
 const POOL_DEPLOY_COST = hre.ethers.utils.parseEther('0.1');
 
 module.exports = {
@@ -64,5 +102,8 @@ module.exports = {
   getFakeDeployment,
   emptyStage,
   POOL_DEPLOY_COST,
-  DEAD_ADDRESS
+  DEAD_ADDRESS,
+  grantRoles,
+  getEventBody,
+  approveMaxAndReturnBalance
 };

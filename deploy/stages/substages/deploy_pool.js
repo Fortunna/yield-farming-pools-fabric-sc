@@ -6,7 +6,7 @@ module.exports = deployPoolWithParams(
   5, 
   0, 
   0, 
-  10,
+  1000,
   hre.ethers.utils.parseEther('0.1'), // min stake
   hre.ethers.utils.parseEther('9'), // max stake
   async ({
