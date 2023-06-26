@@ -91,6 +91,7 @@ contract FortunnaPoolUniswapV3 is
         external
         whenNotPaused
         nonReentrant
+        delegatedOnly 
         onlyRole(DEFAULT_ADMIN_ROLE)
         updateReward(_msgSender())
     {
@@ -124,7 +125,7 @@ contract FortunnaPoolUniswapV3 is
 
     /// @notice Withdraws all tokens deposited by the user and gets rewards for him.
     /// @dev Withdrawal comission is the same as for the `withdraw()` function.
-    function exit() external whenNotPaused {
+    function exit() external delegatedOnly whenNotPaused {
         withdraw(depositsInfo[_msgSender()].balance);
         getReward();
     }
@@ -133,7 +134,7 @@ contract FortunnaPoolUniswapV3 is
     /// @param amount Desired amount of liquidity tokens to withdraw.
     function withdraw(
         uint128 amount
-    ) public whenNotPaused nonReentrant updateReward(_msgSender()) {
+    ) public delegatedOnly whenNotPaused nonReentrant updateReward(_msgSender()) {
         address sender = _msgSender();
         require(amount > 0, "FortunnaPoolUniswapV3: can not withdraw 0");
         (uint256 withdrawn0, uint256 withdrawn1) = _decreaseLiquidity(
@@ -153,6 +154,7 @@ contract FortunnaPoolUniswapV3 is
         public
         whenNotPaused
         nonReentrant
+        delegatedOnly 
         updateReward(_msgSender())
     {
         address sender = _msgSender();
@@ -170,6 +172,7 @@ contract FortunnaPoolUniswapV3 is
     /// @dev Called by the admin once every 12 hours.
     function notifyRewardAmount()
         external
+        delegatedOnly 
         updateReward(address(0))
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
@@ -199,14 +202,14 @@ contract FortunnaPoolUniswapV3 is
     /// @notice Retrieves the last time reward was applicable.
     /// @dev Allows the contract to correctly calculate rewards earned by users.
     /// @return Last time reward was applicable.
-    function lastTimeRewardApplicable() public view returns (uint256) {
+    function lastTimeRewardApplicable() public view delegatedOnly  returns (uint256) {
         return block.timestamp < periodFinish ? block.timestamp : periodFinish;
     }
 
     /// @notice Retrieves the amount of reward per token staked.
     /// @dev The logic is derived from the StakingRewards contract.
     /// @return Amount of reward per token staked.
-    function rewardPerToken(uint8 index) public view returns (uint256) {
+    function rewardPerToken(uint8 index) public view delegatedOnly  returns (uint256) {
         if (totalLiquidity == 0) {
             return rewardsPerTokenStored[index];
         }
@@ -222,7 +225,7 @@ contract FortunnaPoolUniswapV3 is
     /// @dev The logic is derived from the StakingRewards contract.
     /// @param user User address.
     /// @return Amount of rewards earned by the user.
-    function earned(address user, uint8 index) public view returns (uint256) {
+    function earned(address user, uint8 index) public view delegatedOnly returns (uint256) {
         return
             (depositsInfo[user].balance *
                 (rewardPerToken(index) -
@@ -440,6 +443,11 @@ contract FortunnaPoolUniswapV3 is
             !isInitialized,
             "FortunnaPoolUniswapV3: cannot call the function when the contract already initialized."
         );
+        _;
+    }
+
+    modifier delegatedOnly {
+        require(isInitialized, "FortunnaPoolUniswapV3: cannot call directly.");
         _;
     }
 
