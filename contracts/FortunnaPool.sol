@@ -158,7 +158,10 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         address sender = _msgSender();
         UserInfo storage userInfo = usersInfo[sender];
         if (userInfo.amount < amount) {
-            revert FortunnaErrorsLib.InvalidScalar(amount, "cannotWithdrawThisMuch");
+            revert FortunnaErrorsLib.InvalidScalar(
+                amount,
+                "cannotWithdrawThisMuch"
+            );
         }
         _getReward();
         userInfo.amount -= amount;

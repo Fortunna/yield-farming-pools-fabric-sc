@@ -307,6 +307,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         if (!pools.add(pool)) {
             revert FortunnaErrorsLib.AddressAlreadyExists(pool);
         }
+
         address prototypeAddress = prototypes.at(poolParameters.protoPoolIdx);
         address fortunnaTokenPrototype = prototypes.at(
             FORTUNNA_TOKEN_PROTO_INDEX

@@ -13,7 +13,10 @@ library FortunnaBitMaskLib {
         bool[] calldata flags
     ) internal pure returns (bytes32 result) {
         if (flags.length > 256) {
-            revert FortunnaErrorsLib.InvalidLength(flags.length, "flagsLength>256");
+            revert FortunnaErrorsLib.InvalidLength(
+                flags.length,
+                "flagsLength>256"
+            );
         }
         for (uint256 i = 0; i < flags.length; i++) {
             if (flags[i]) {
