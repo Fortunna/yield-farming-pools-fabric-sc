@@ -2,12 +2,14 @@
 pragma solidity =0.7.6;
 pragma abicoder v2;
 
-import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
+import '@openzeppelin/contracts/proxy/Initializable.sol';
+
+import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 
-contract FortunnaPoolUniswapV3 is IERC721Receiver {
+contract FortunnaPoolUniswapV3 is IERC721Receiver, Initializable {
     address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
 
     uint24 public constant POOL_FEE = 3000;
@@ -30,7 +32,7 @@ contract FortunnaPoolUniswapV3 is IERC721Receiver {
         address _stakingToken,
         address _rewardToken,
         INonfungiblePositionManager _nonfungiblePositionManager
-    ) external {
+    ) external initializer {
         nonfungiblePositionManager = _nonfungiblePositionManager;
         PTT = _rewardToken;
     }

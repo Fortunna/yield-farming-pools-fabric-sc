@@ -76,7 +76,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
             if (reserve > 0) {
                 if (token == address(0)) {
                     if (msg.value != reserve) {
-                        revert FortunnaLib.NotEnoughtPayment(msg.value);
+                        revert FortunnaErrorsLib.NotEnoughtPayment(msg.value);
                     }
                 } else {
                     IERC20(token).safeTransferFrom(
@@ -163,7 +163,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
                 );
             } else {
                 if (amountIn > msg.value) {
-                    revert FortunnaLib.NotEnoughtPayment(amountIn);
+                    revert FortunnaErrorsLib.NotEnoughtPayment(amountIn);
                 }
             }
             getReserve[i] += amountIn;

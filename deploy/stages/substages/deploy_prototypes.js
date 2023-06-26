@@ -16,7 +16,8 @@ module.exports = async ({
   });
 
   const libraries = {
-    FortunnaLib: (await get(hre.names.internal.fortunnaLib)).address 
+    FortunnaLib: (await get(hre.names.internal.fortunnaLib)).address,
+    FortunnaErrorsLib: (await get(hre.names.internal.fortunnaErrorsLib)).address 
   }
   log(`Acquired libaries settings: ${JSON.stringify(libraries)}`);
 

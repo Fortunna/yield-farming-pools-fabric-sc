@@ -83,7 +83,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     function _provideRewardTokens(uint256 amount) internal {
         amount += requestedRewardTokensToDistribute;
         if (providedRewardTokensBalance > amount) {
-            revert FortunnaLib.NotEnoughRewardToDistribute(
+            revert FortunnaErrorsLib.NotEnoughRewardToDistribute(
                 providedRewardTokensBalance,
                 requestedRewardTokensToDistribute
             );
@@ -110,12 +110,12 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
 
     function _checkTimeIntervals() internal view {
         if (block.timestamp < scalarParams.startTimestamp) {
-            revert FortunnaLib.DistributionNotStarted(
+            revert FortunnaErrorsLib.DistributionNotStarted(
                 scalarParams.startTimestamp - block.timestamp
             );
         }
         if (block.timestamp > scalarParams.endTimestamp) {
-            revert FortunnaLib.DistributionEnded(
+            revert FortunnaErrorsLib.DistributionEnded(
                 block.timestamp - scalarParams.endTimestamp
             );
         }
@@ -123,13 +123,13 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
 
     function stake(uint256 amount) external nonReentrant {
         if (amount > scalarParams.maxStakeAmount) {
-            revert FortunnaLib.TooMuchStaked(
+            revert FortunnaErrorsLib.TooMuchStaked(
                 amount,
                 scalarParams.maxStakeAmount
             );
         }
         if (amount < scalarParams.minStakeAmount) {
-            revert FortunnaLib.NotEnoughStaked(
+            revert FortunnaErrorsLib.NotEnoughStaked(
                 amount,
                 scalarParams.minStakeAmount
             );
@@ -158,7 +158,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         address sender = _msgSender();
         UserInfo storage userInfo = usersInfo[sender];
         if (userInfo.amount < amount) {
-            revert FortunnaLib.InvalidScalar(amount, "cannotWithdrawThisMuch");
+            revert FortunnaErrorsLib.InvalidScalar(amount, "cannotWithdrawThisMuch");
         }
         _getReward();
         userInfo.amount -= amount;

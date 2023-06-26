@@ -84,7 +84,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// @inheritdoc AccessControl
     function renounceRole(bytes32 role, address account) public override {
         if (hasRole(FortunnaLib.BANNED_ROLE, account))
-            revert FortunnaLib.Banned(account);
+            revert FortunnaErrorsLib.Banned(account);
         super.renounceRole(role, account);
     }
 
@@ -111,9 +111,9 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         address[] calldata utilizingTokens
     ) internal view {
         if (hasRole(FortunnaLib.BANNED_ROLE, sender))
-            revert FortunnaLib.Banned(sender);
+            revert FortunnaErrorsLib.Banned(sender);
         if (utilizingTokens.length > 256) {
-            revert FortunnaLib.InvalidLength(
+            revert FortunnaErrorsLib.InvalidLength(
                 utilizingTokens.length,
                 "utilizingTokens>256"
             );
@@ -122,7 +122,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             address token = utilizingTokens[i];
             if (stakingTokensMask.isBitUp(i)) {
                 if (!hasRole(FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE, token)) {
-                    revert FortunnaLib.NotAuthorized(
+                    revert FortunnaErrorsLib.NotAuthorized(
                         FortunnaLib.ALLOWED_STAKING_TOKEN_ROLE,
                         token
                     );
@@ -130,7 +130,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             }
             if (rewardTokensMask.isBitUp(i)) {
                 if (!hasRole(FortunnaLib.ALLOWED_REWARD_TOKEN_ROLE, token)) {
-                    revert FortunnaLib.NotAuthorized(
+                    revert FortunnaErrorsLib.NotAuthorized(
                         FortunnaLib.ALLOWED_REWARD_TOKEN_ROLE,
                         token
                     );
@@ -138,7 +138,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             }
         }
         if (initialRewardAmountsLength != utilizingTokens.length) {
-            revert FortunnaLib.AreNotEqual(
+            revert FortunnaErrorsLib.AreNotEqual(
                 initialRewardAmountsLength,
                 utilizingTokens.length,
                 "tokensLen!=initRewardLen"
@@ -146,7 +146,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         }
 
         if (initialDepositAmountsLength != utilizingTokens.length) {
-            revert FortunnaLib.AreNotEqual(
+            revert FortunnaErrorsLib.AreNotEqual(
                 initialDepositAmountsLength,
                 utilizingTokens.length,
                 "tokensLen!=initDepositLen"
@@ -163,19 +163,19 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         FortunnaLib.PoolParameters calldata _poolParameters
     ) internal view {
         if (prototypes.at(_poolParameters.protoPoolIdx) == address(0)) {
-            revert FortunnaLib.UnknownPrototypeIndex(
+            revert FortunnaErrorsLib.UnknownPrototypeIndex(
                 _poolParameters.protoPoolIdx
             );
         }
         if (_poolParameters.startTimestamp > _poolParameters.endTimestamp) {
-            revert FortunnaLib.IncorrectInterval(
+            revert FortunnaErrorsLib.IncorrectInterval(
                 _poolParameters.startTimestamp,
                 _poolParameters.endTimestamp,
                 "time"
             );
         }
         if (_poolParameters.minStakeAmount > _poolParameters.maxStakeAmount) {
-            revert FortunnaLib.IncorrectInterval(
+            revert FortunnaErrorsLib.IncorrectInterval(
                 _poolParameters.minStakeAmount,
                 _poolParameters.maxStakeAmount,
                 "stakeAmount"
@@ -185,7 +185,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             _poolParameters.earlyWithdrawalFeeBasePoints >
             FortunnaLib.BASE_POINTS_MAX
         ) {
-            revert FortunnaLib.IncorrectBasePoints(
+            revert FortunnaErrorsLib.IncorrectBasePoints(
                 _poolParameters.earlyWithdrawalFeeBasePoints,
                 "earlyWithdrawal"
             );
@@ -194,7 +194,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             _poolParameters.depositWithdrawFeeBasePoints >
             FortunnaLib.BASE_POINTS_MAX
         ) {
-            revert FortunnaLib.IncorrectBasePoints(
+            revert FortunnaErrorsLib.IncorrectBasePoints(
                 _poolParameters.depositWithdrawFeeBasePoints,
                 "depositWithdraw"
             );
@@ -203,7 +203,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             _poolParameters.totalRewardBasePointsPerDistribution >
             FortunnaLib.BASE_POINTS_MAX
         ) {
-            revert FortunnaLib.IncorrectBasePoints(
+            revert FortunnaErrorsLib.IncorrectBasePoints(
                 _poolParameters.totalRewardBasePointsPerDistribution,
                 "rewardBasePoints"
             );
@@ -270,7 +270,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
 
         if (paymentInfo.paymentToken == address(0)) {
             if (msg.value < paymentInfo.cost) {
-                revert FortunnaLib.NotEnoughtPayment(msg.value);
+                revert FortunnaErrorsLib.NotEnoughtPayment(msg.value);
             }
         } else {
             IERC20(paymentInfo.paymentToken).safeTransferFrom(
@@ -305,7 +305,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             );
 
         if (!pools.add(pool)) {
-            revert FortunnaLib.AddressAlreadyExists(pool);
+            revert FortunnaErrorsLib.AddressAlreadyExists(pool);
         }
         address prototypeAddress = prototypes.at(poolParameters.protoPoolIdx);
         address fortunnaTokenPrototype = prototypes.at(

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.6 <=0.8.20;
 
-import "../FortunnaLib.sol";
+import "../libraries/FortunnaLib.sol";
 import "./INativeTokenReceivable.sol";
 
 /// @title The interface for the Fortunna Yield Farming pools factory.

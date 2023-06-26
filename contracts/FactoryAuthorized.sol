@@ -6,7 +6,8 @@ import "@openzeppelin/contracts-new/access/IAccessControl.sol";
 import "@openzeppelin/contracts-new/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-new/security/Pausable.sol";
 
-import "./FortunnaLib.sol";
+import "./libraries/FortunnaLib.sol";
+import "./libraries/FortunnaErrorsLib.sol";
 
 abstract contract FactoryAuthorized is
     Initializable,
@@ -17,7 +18,7 @@ abstract contract FactoryAuthorized is
 
     modifier delegatedOnly() {
         if (_isInitializing()) {
-            revert FortunnaLib.NotInitialized();
+            revert FortunnaErrorsLib.NotInitialized();
         }
         _;
     }
@@ -25,7 +26,7 @@ abstract contract FactoryAuthorized is
     function _onlyRoleInFactory(bytes32 role) internal view {
         address sender = _msgSender();
         if (!IAccessControl(_factory).hasRole(role, sender)) {
-            revert FortunnaLib.NotAuthorized(role, sender);
+            revert FortunnaErrorsLib.NotAuthorized(role, sender);
         }
     }
 
