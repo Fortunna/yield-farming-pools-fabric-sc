@@ -5,6 +5,11 @@ pragma solidity >=0.7.6 <=0.8.20;
 /// @author Fortunna Team
 /// @notice A lib holding default errors, helpers functions and constants.
 library FortunnaLib {
+
+    struct CustomPoolParameters {
+        address nonfungiblePositionManager;
+    }
+
     /// @dev A struct to hold pools scalar deploy parameters.
     struct PoolParameters {
         // An index of pool prototype in the factory list of prototypes.
@@ -29,6 +34,7 @@ library FortunnaLib {
         bytes32 stakingTokensMask;
         // A bit mask to indicate whether the token in `utilizingTokens` is reward token.
         bytes32 rewardTokensMask;
+        CustomPoolParameters custom;
     }
 
     /// @dev A struct to hold pools vector deploy parameters.

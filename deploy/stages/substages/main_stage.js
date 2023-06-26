@@ -1,21 +1,17 @@
 const hre = require('hardhat');
-const { skipIfAlreadyDeployed, POOL_DEPLOY_COST, DEAD_ADDRESS } = require('../../helpers');
+const { skipIfAlreadyDeployed, POOL_DEPLOY_COST } = require('../../helpers');
 
 module.exports = async ({
   getNamedAccounts,
   deployments,
   network
 }) => {
-  const { log, deploy, get, execute } = deployments;
+  const { deploy, get, execute } = deployments;
   const { deployer } = await getNamedAccounts();
 
   const fortunnaPoolPrototypeAddress = (await get(hre.names.internal.fortunnaPool)).address;
   const fortunnaTokenPrototypeAddress = (await get(hre.names.internal.fortunnaToken)).address;
-
-  /// TO BE REDACTED
-  const fortunnaPoolUniswapV3PrototypeAddress = DEAD_ADDRESS;
-  log('UNISWAP V3 POOL HAS NOT YET BEEN IMPLEMENTED.');
-  /// TO BE REDACTED
+  const fortunnaPoolUniswapV3PrototypeAddress = (await get(hre.names.internal.fortunnaPoolUniswapV3)).address;
 
   await deploy(hre.names.internal.fortunnaFactory, {
     from: deployer,

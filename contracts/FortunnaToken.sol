@@ -68,29 +68,6 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         }
     }
 
-    /// @inheritdoc IFortunnaToken
-    function initializeReserves(
-        uint256[] memory reserves
-    ) external payable override onlyAdmin {
-        for (uint256 i = 0; i < underlyingTokens.length; i++) {
-            address token = underlyingTokens[i];
-            uint256 reserve = reserves[i];
-            if (reserve > 0) {
-                if (token == address(0)) {
-                    if (msg.value != reserve) {
-                        revert FortunnaErrorsLib.NotEnoughtPayment(msg.value);
-                    }
-                } else {
-                    IERC20(token).safeTransferFrom(
-                        _msgSender(),
-                        address(this),
-                        reserve
-                    );
-                }
-            }
-        }
-    }
-
     /// @inheritdoc ERC20
     function name()
         public

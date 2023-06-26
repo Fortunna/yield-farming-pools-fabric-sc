@@ -66,20 +66,10 @@ contract FortunnaPoolUniswapV3 is
         address _token0,
         address _token1,
         FortunnaLib.PoolParameters calldata poolParameters,
-        FortunnaLib.PoolParametersArrays calldata poolParametersArrays,
-        INonfungiblePositionManager _nonfungiblePositionManager
-    ) external initializer {
-        _factory = _msgSender();
-        nonfungiblePositionManager = _nonfungiblePositionManager;
-        initialize(_token0, _token1, poolParameters, poolParametersArrays);
-    }
-
-    function initialize(
-        address _token0,
-        address _token1,
-        FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
-    ) public override onlyInitializing {
+    ) public override initializer {
+        _factory = _msgSender();
+        nonfungiblePositionManager = INonfungiblePositionManager(poolParameters.custom.nonfungiblePositionManager);
         tokens[0] = _token0;
         tokens[1] = _token1;
         scalarParams = poolParameters;

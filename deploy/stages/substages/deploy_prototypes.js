@@ -15,9 +15,24 @@ module.exports = async ({
     log: true
   });
 
+  await deploy(hre.names.internal.fortunnaErrorsLib, {
+    from: deployer,
+    skipIfAlreadyDeployed,
+    log: true
+  });
+
+  await deploy(hre.names.internal.fortunnaBitMaskLib, {
+    from: deployer,
+    skipIfAlreadyDeployed,
+    log: true
+  });
+
+  const fortunnaLibAddress = (await get(hre.names.internal.fortunnaLib)).address;
+
   const libraries = {
-    FortunnaLib: (await get(hre.names.internal.fortunnaLib)).address,
-    FortunnaErrorsLib: (await get(hre.names.internal.fortunnaErrorsLib)).address 
+    FortunnaLib: fortunnaLibAddress,
+    FortunnaErrorsLib: (await get(hre.names.internal.fortunnaErrorsLib)).address,
+    FortunnaBitMaskLib: (await get(hre.names.internal.fortunnaBitMaskLib)).address 
   }
   log(`Acquired libaries settings: ${JSON.stringify(libraries)}`);
 
@@ -26,6 +41,15 @@ module.exports = async ({
     skipIfAlreadyDeployed,
     log: true,
     libraries
+  });
+
+  await deploy(hre.names.internal.fortunnaPoolUniswapV3, {
+    from: deployer,
+    skipIfAlreadyDeployed,
+    log: true,
+    libraries: {
+      FortunnaLib: fortunnaLibAddress
+    }
   });
 
   await deploy(hre.names.internal.fortunnaToken, {

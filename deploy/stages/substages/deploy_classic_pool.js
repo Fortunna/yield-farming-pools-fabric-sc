@@ -1,7 +1,9 @@
 const hre = require('hardhat');
 const deployPoolWithParams = require("./reusable/deploy_pool_with_params");
+const { DEAD_ADDRESS } = require('../../helpers');
 
 module.exports = deployPoolWithParams(
+  0, // classic fortunna pool
   30, 
   5, 
   0, 
@@ -42,8 +44,9 @@ module.exports = deployPoolWithParams(
       stakingTokensFlags: [true, true],
       rewardTokensFlags: [true, false],
       initialRewardAmounts: [[0, rewardAmountInMockTokens], [1, hre.ethers.constants.Zero]],
-      initialDepositAmounts: [[0, hre.ethers.constants.Zero], [1, hre.ethers.constants.Zero]]
+      initialDepositAmounts: [[0, hre.ethers.constants.Zero], [1, hre.ethers.constants.Zero]],
+      customPoolParams: [DEAD_ADDRESS]
     }
   }  
 );
-module.exports.tags = ["deploy_pool", "pool"];
+module.exports.tags = ["deploy_classic_pool", "pool"];

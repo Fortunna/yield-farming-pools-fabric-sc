@@ -1,8 +1,9 @@
 const hre = require('hardhat');
-const { POOL_DEPLOY_COST, grantRoles, getEventBody, approveMaxAndReturnBalance } = require("../../../helpers");
+const { POOL_DEPLOY_COST, grantRoles, getEventBody, approveMaxAndReturnBalance, DEAD_ADDRESS } = require("../../../helpers");
 
 module.exports = 
   (
+    poolPrototypeIdx,
     poolFunctionalityDurationInDays,
     minLockUpRewardPeriodInDays,
     earlyWithdrawalFeeBasePoints,
@@ -10,7 +11,7 @@ module.exports =
     totalRewardBasePointsPerDistribution,
     minStake,
     maxStake,
-    getUtilizingTokensAndListsOfFlags
+    getUtilizingTokensAndListsOfFlags,
   ) => async (deployScriptParams) => {
     const {
       getNamedAccounts,
@@ -23,6 +24,7 @@ module.exports =
     const rewardTokensFlags = utilizingTokensAndListsOfFlagsDTO.rewardTokensFlags;
     const initialRewardAmounts = utilizingTokensAndListsOfFlagsDTO.initialRewardAmounts;
     const initialDepositAmounts = utilizingTokensAndListsOfFlagsDTO.initialDepositAmounts;
+    const customPoolParams = utilizingTokensAndListsOfFlagsDTO.customPoolParams;
 
     const { log, execute, get } = deployments;
     const { deployer } = await getNamedAccounts();
@@ -78,7 +80,7 @@ module.exports =
 
     const createPoolTxReceipt = await fortunnaFactoryInstance.createPool(
       [
-        0, // pool prototype idx
+        poolPrototypeIdx,
         startTimestamp,
         endTimestamp,
         minStake,
@@ -88,7 +90,8 @@ module.exports =
         depositWithdrawFeeBasePoints,
         totalRewardBasePointsPerDistribution,
         stakingTokensMask,
-        rewardTokensMask
+        rewardTokensMask,
+        customPoolParams
       ],
       [
         utilizingTokensAddresses,

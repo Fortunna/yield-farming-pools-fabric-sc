@@ -301,7 +301,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         ) = predictFortunnaTokenAddress(
                 poolParameters.protoPoolIdx,
                 sender,
-                false
+                poolParameters.protoPoolIdx != 0 // if classic fortunna pool - false, if uniswapv3 - true
             );
 
         if (!pools.add(pool)) {
