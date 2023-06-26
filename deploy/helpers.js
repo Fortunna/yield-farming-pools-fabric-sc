@@ -7,6 +7,7 @@ const keccak256 = require("keccak256");
 
 const DEAD_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 const skipIfAlreadyDeployed = true;
+const POOL_DEPLOY_COST = hre.ethers.utils.parseEther('0.1');
 
 ////////////////////////////////////////////
 // Constants Ends
@@ -91,8 +92,6 @@ const approveMaxAndReturnBalance = async (fortunnaToken, typeOfFortunnaToken, de
   }
   return fortunnaTokenBalance;
 }
-
-const POOL_DEPLOY_COST = hre.ethers.utils.parseEther('0.1');
 
 module.exports = {
   getMockToken,

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity >=0.7.6 <=0.8.20;
 
 /// @title The interface for the Fortunna Yield Farming smart-contracts that can receive native tokens.
 /// @author Fortunna Team

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity ^0.8.0;
 
 /// @title Canonical Fortunna Yield Farming pools lib
 /// @author Fortunna Team
@@ -77,6 +77,8 @@ library FortunnaLib {
     error InvalidWeightedInput(uint256[] amounts);
 
     error NotEnoughRewardToDistribute(uint256 provided, uint256 actual);
+
+    error NotImplemented();
 
     /// @dev A struct to hold pools scalar deploy parameters.
     struct PoolParameters {

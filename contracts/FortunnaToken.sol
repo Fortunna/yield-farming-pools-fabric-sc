@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity >=0.7.6 <=0.8.20;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/access/IAccessControl.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-new/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-new/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-new/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-new/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-new/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts-new/access/IAccessControl.sol";
+import "@openzeppelin/contracts-new/utils/Address.sol";
 
 import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";

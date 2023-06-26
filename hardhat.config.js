@@ -19,15 +19,25 @@ const sepoliaUrl = `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_S
 const mainnetChainId = 1;
 const sepoliaChainId = 11155111;
 
-const DEFAULT_SETTING = {
-  version: "0.8.20",
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 200,
+const optimizer = {
+  enabled: true,
+  runs: 200,
+}
+
+const compilers = [
+  {
+    version: "0.8.20",
+    settings: {
+      optimizer
+    }
+  },
+  {
+    version: "0.7.6",
+    settings: {
+      optimizer
     }
   }
-}
+]
 
 extendEnvironment(async (hre) => {
   // This is for the deploy artifacts stage management.
@@ -108,7 +118,15 @@ extendEnvironment(async (hre) => {
 
 module.exports = {
   solidity: {
-    compilers: [DEFAULT_SETTING]
+    compilers,
+    overrides: {
+      "@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol": {
+        version: "0.7.6",
+        settings: {
+          optimizer
+        }
+      }
+    }
   },
   mocha: {
     timeout: '100000'

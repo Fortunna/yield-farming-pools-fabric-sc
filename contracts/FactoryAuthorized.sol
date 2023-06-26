@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity >=0.7.6 <=0.8.20;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/access/IAccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts-new/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-new/access/IAccessControl.sol";
+import "@openzeppelin/contracts-new/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-new/security/Pausable.sol";
 
 import "./FortunnaLib.sol";
 
