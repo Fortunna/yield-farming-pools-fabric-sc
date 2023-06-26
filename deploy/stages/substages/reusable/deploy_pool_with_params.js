@@ -104,10 +104,14 @@ module.exports =
     );
     await createPoolTxReceipt.wait();
 
-    const poolCreatedFilter = fortunnaFactoryInstance.filters.PoolCreated();
-    const filterQueryResult = await fortunnaFactoryInstance.queryFilter(poolCreatedFilter);
-    const poolAddress = filterQueryResult[0].args.pool;
-
+    const getEventBody = async (eventName, contractInstance) => {
+      const filter = contractInstance.filters[eventName]();
+      const filterQueryResult = await contractInstance.queryFilter(filter);
+      return filterQueryResult[0].args;
+    }
+    
+    
+    const poolAddress = (await getEventBody("PoolCreated", fortunnaFactoryInstance)).pool;
     log(`Acquired pool address from the factory: ${poolAddress}`);
 
     const rewardTokenInstance = await hre.ethers.getContractAt(
@@ -143,8 +147,10 @@ module.exports =
     const addExpectedRewardTxReceipt = await poolInstance
       .addExpectedRewardTokensBalanceToDistribute(rewardTokenBalance);
     await addExpectedRewardTxReceipt.wait();
+    log(`Total reword amount: ${hre.ethers.utils.formatUnits((await getEventBody("RewardAdded", poolInstance)).reward)}`);
 
     const providePartOfTotalRewardsTxReceipt = await poolInstance
       .providePartOfTotalRewards();
     await providePartOfTotalRewardsTxReceipt.wait();
+    log(`Part of reward ready to distribute: ${hre.ethers.utils.formatUnits((await getEventBody("PartDistributed", poolInstance)).partOfTotalRewards)}`);
   }
