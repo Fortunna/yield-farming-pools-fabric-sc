@@ -236,11 +236,15 @@ contract FortunnaPoolUniswapV3 is
 
     // Implementing `onERC721Received` so this contract can receive custody of erc721 tokens
     function onERC721Received(
-        address,
+        address operator,
         address,
         uint256,
         bytes calldata
-    ) external override returns (bytes4) {
+    ) external override view returns (bytes4) {
+        require(
+            operator == address(nonfungiblePositionManager), 
+            "FortunnaPoolUniswapV3: unauthorized operator"
+        );
         return this.onERC721Received.selector;
     }
 
