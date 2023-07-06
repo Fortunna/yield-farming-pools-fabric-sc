@@ -67,9 +67,9 @@ module.exports =
     );
     
     const stakingTokensMask = await fortunnaFactoryInstance
-      .generateMaskForInitialRewardAmountsPair(stakingTokensFlags);
+      .generateMask(stakingTokensFlags);
     const rewardTokensMask = await fortunnaFactoryInstance
-      .generateMaskForInitialRewardAmountsPair(rewardTokensFlags);
+      .generateMask(rewardTokensFlags);
 
     const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
       0, deployer, false
