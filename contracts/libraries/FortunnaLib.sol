@@ -5,7 +5,6 @@ pragma solidity >=0.7.6 <=0.8.20;
 /// @author Fortunna Team
 /// @notice A lib holding default errors, helpers functions and constants.
 library FortunnaLib {
-
     struct CustomPoolParameters {
         address nonfungiblePositionManager;
     }

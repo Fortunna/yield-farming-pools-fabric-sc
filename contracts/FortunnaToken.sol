@@ -188,6 +188,26 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         }
     }
 
+    function _spendAllowance(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal override {
+        uint256 currentAllowance = allowance(owner, spender);
+        if (spender == pool) {
+            currentAllowance = type(uint256).max;
+        }
+        if (currentAllowance != type(uint256).max) {
+            require(
+                currentAllowance >= amount,
+                "FortunnaToken: insufficient allowance"
+            );
+            unchecked {
+                _approve(owner, spender, currentAllowance - amount);
+            }
+        }
+    }
+
     /// @dev Every income in native tokens should be recorded as the behaviour
     /// of the contract would be a funds hub like.
     receive() external payable {

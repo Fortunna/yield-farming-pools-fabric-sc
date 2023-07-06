@@ -34,6 +34,8 @@ contract FortunnaPoolUniswapV3 is
         uint256 lastDepositTime;
     }
 
+    address internal immutable __self = address(this);
+
     uint24 public constant POOL_FEE = 3000;
     uint256 public constant REWARDS_DURATION = 12 hours;
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
@@ -63,15 +65,16 @@ contract FortunnaPoolUniswapV3 is
     mapping(address => DepositInfo) internal depositsInfo;
 
     function initialize(
-        address _token0,
-        address _token1,
+        address,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) public override initializer {
         _factory = _msgSender();
-        nonfungiblePositionManager = INonfungiblePositionManager(poolParameters.custom.nonfungiblePositionManager);
-        tokens[0] = _token0;
-        tokens[1] = _token1;
+        nonfungiblePositionManager = INonfungiblePositionManager(
+            poolParameters.custom.nonfungiblePositionManager
+        );
+        tokens[0] = poolParametersArrays.utilizingTokens[0];
+        tokens[1] = poolParametersArrays.utilizingTokens[1];
         scalarParams = poolParameters;
         vectorParams = poolParametersArrays;
         isInitialized = true;
@@ -89,7 +92,7 @@ contract FortunnaPoolUniswapV3 is
         uint256 amount1
     )
         external
-        delegatedOnly 
+        delegatedOnly
         whenNotPaused
         nonReentrant
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -134,7 +137,13 @@ contract FortunnaPoolUniswapV3 is
     /// @param amount Desired amount of liquidity tokens to withdraw.
     function withdraw(
         uint128 amount
-    ) public delegatedOnly whenNotPaused nonReentrant updateReward(_msgSender()) {
+    )
+        public
+        delegatedOnly
+        whenNotPaused
+        nonReentrant
+        updateReward(_msgSender())
+    {
         address sender = _msgSender();
         require(amount > 0, "FortunnaPoolUniswapV3: can not withdraw 0");
         (uint256 withdrawn0, uint256 withdrawn1) = _decreaseLiquidity(
@@ -152,7 +161,7 @@ contract FortunnaPoolUniswapV3 is
     /// @dev There are no fees on the reward.
     function getReward()
         public
-        delegatedOnly 
+        delegatedOnly
         whenNotPaused
         nonReentrant
         updateReward(_msgSender())
@@ -172,7 +181,7 @@ contract FortunnaPoolUniswapV3 is
     /// @dev Called by the admin once every 12 hours.
     function notifyRewardAmount()
         external
-        delegatedOnly 
+        delegatedOnly
         updateReward(address(0))
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
@@ -202,14 +211,21 @@ contract FortunnaPoolUniswapV3 is
     /// @notice Retrieves the last time reward was applicable.
     /// @dev Allows the contract to correctly calculate rewards earned by users.
     /// @return Last time reward was applicable.
-    function lastTimeRewardApplicable() public view delegatedOnly  returns (uint256) {
+    function lastTimeRewardApplicable()
+        public
+        view
+        delegatedOnly
+        returns (uint256)
+    {
         return block.timestamp < periodFinish ? block.timestamp : periodFinish;
     }
 
     /// @notice Retrieves the amount of reward per token staked.
     /// @dev The logic is derived from the StakingRewards contract.
     /// @return Amount of reward per token staked.
-    function rewardPerToken(uint8 index) public view delegatedOnly  returns (uint256) {
+    function rewardPerToken(
+        uint8 index
+    ) public view delegatedOnly returns (uint256) {
         if (totalLiquidity == 0) {
             return rewardsPerTokenStored[index];
         }
@@ -225,7 +241,10 @@ contract FortunnaPoolUniswapV3 is
     /// @dev The logic is derived from the StakingRewards contract.
     /// @param user User address.
     /// @return Amount of rewards earned by the user.
-    function earned(address user, uint8 index) public view delegatedOnly returns (uint256) {
+    function earned(
+        address user,
+        uint8 index
+    ) public view delegatedOnly returns (uint256) {
         return
             (depositsInfo[user].balance *
                 (rewardPerToken(index) -
@@ -240,9 +259,9 @@ contract FortunnaPoolUniswapV3 is
         address,
         uint256,
         bytes calldata
-    ) external override view returns (bytes4) {
+    ) external view override returns (bytes4) {
         require(
-            operator == address(nonfungiblePositionManager), 
+            operator == address(nonfungiblePositionManager),
             "FortunnaPoolUniswapV3: unauthorized operator"
         );
         return this.onERC721Received.selector;
@@ -450,8 +469,11 @@ contract FortunnaPoolUniswapV3 is
         _;
     }
 
-    modifier delegatedOnly {
-        require(isInitialized, "FortunnaPoolUniswapV3: cannot call directly.");
+    modifier delegatedOnly() {
+        require(
+            isInitialized && __self != address(this),
+            "FortunnaPoolUniswapV3: cannot call directly."
+        );
         _;
     }
 

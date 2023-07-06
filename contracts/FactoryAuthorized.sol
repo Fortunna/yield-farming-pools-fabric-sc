@@ -14,10 +14,11 @@ abstract contract FactoryAuthorized is
     Pausable,
     ReentrancyGuard
 {
+    address internal immutable __self = address(this);
     address internal _factory;
 
     modifier delegatedOnly() {
-        if (_isInitializing()) {
+        if (_isInitializing() || __self == address(this)) {
             revert FortunnaErrorsLib.NotInitialized();
         }
         _;

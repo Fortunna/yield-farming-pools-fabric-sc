@@ -31,7 +31,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     EnumerableSet.AddressSet internal prototypes;
 
     /// @dev An index in `prototypes` of FortunnaToken. Depends on the addition process in the initialization function.
-    uint256 public constant FORTUNNA_TOKEN_PROTO_INDEX = 2;
+    uint256 public constant override FORTUNNA_TOKEN_PROTO_INDEX = 2;
 
     /// @notice A constructor.
     /// @param paymentTokens An array of tokens addresses to be allowed as payment for pool deploy tokens.
@@ -213,7 +213,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     function predictPoolAddress(
         uint256 poolProtoIdx,
         address poolOwner
-    ) public view returns (address result, bytes32 salt) {
+    ) public view override returns (address result, bytes32 salt) {
         address poolPrototypeAddress = prototypes.at(poolProtoIdx);
         salt = keccak256(
             abi.encodePacked(poolPrototypeAddress, poolOwner, pools.length())
@@ -225,7 +225,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         uint256 poolProtoIdx,
         address poolOwner,
         bool isStakingOrReward
-    ) public view returns (address result, bytes32 salt) {
+    ) external view override returns (address result, bytes32 salt) {
         address fortunnaTokenPrototype = prototypes.at(
             FORTUNNA_TOKEN_PROTO_INDEX
         );
@@ -243,7 +243,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     function calculateFortunnaTokens(
         uint256[2][] memory initialDepositAmounts,
         address fortunnaTokenAddress
-    ) public view returns (uint256 amountToMint) {
+    ) public view override returns (uint256 amountToMint) {
         for (uint256 i = 0; i < initialDepositAmounts.length; i++) {
             uint256[2] memory pair = initialDepositAmounts[i];
             if (pair[1] == 0) continue;
@@ -286,67 +286,18 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
             sender
         );
 
-        (
-            address stakingTokenAddress,
-            bytes32 stakingTokenDeploySalt
-        ) = predictFortunnaTokenAddress(
-                poolParameters.protoPoolIdx,
-                sender,
-                true
-            );
-
-        (
-            address rewardTokenAddress,
-            bytes32 rewardTokenDeploySalt
-        ) = predictFortunnaTokenAddress(
-                poolParameters.protoPoolIdx,
-                sender,
-                poolParameters.protoPoolIdx != 0 // if classic fortunna pool - false, if uniswapv3 - true
-            );
-
         if (!pools.add(pool)) {
             revert FortunnaErrorsLib.AddressAlreadyExists(pool);
         }
 
         address prototypeAddress = prototypes.at(poolParameters.protoPoolIdx);
-        address fortunnaTokenPrototype = prototypes.at(
-            FORTUNNA_TOKEN_PROTO_INDEX
-        );
-
-        Clones.cloneDeterministic(prototypeAddress, deploySalt);
-        Clones.cloneDeterministic(
-            fortunnaTokenPrototype,
-            stakingTokenDeploySalt
-        );
-        Clones.cloneDeterministic(
-            fortunnaTokenPrototype,
-            rewardTokenDeploySalt
-        );
+        prototypeAddress.cloneDeterministic(deploySalt);
 
         IFortunnaPool(pool).initialize(
-            stakingTokenAddress,
-            rewardTokenAddress,
+            sender,
             poolParameters,
             poolParametersArrays
         );
-
-        uint256 amountToMint = calculateFortunnaTokens(
-            poolParametersArrays.initialDepositAmounts,
-            stakingTokenAddress
-        );
-        if (amountToMint > 0) {
-            IFortunnaToken(stakingTokenAddress).mint(sender, amountToMint);
-            amountToMint = 0;
-        }
-
-        amountToMint = calculateFortunnaTokens(
-            poolParametersArrays.initialRewardAmounts,
-            rewardTokenAddress
-        );
-        if (amountToMint > 0) {
-            IFortunnaToken(rewardTokenAddress).mint(sender, amountToMint);
-        }
-
         emit PoolCreated(pool);
     }
 

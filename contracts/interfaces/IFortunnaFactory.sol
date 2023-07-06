@@ -64,4 +64,22 @@ interface IFortunnaFactory is INativeTokenReceivable {
 
     /// @notice A public getter function to acquire the total amount of deployed prototypes.
     function getPrototypesLength() external view returns (uint256);
+
+    function predictPoolAddress(
+        uint256 poolProtoIdx,
+        address poolOwner
+    ) external view returns (address result, bytes32 salt);
+
+    function predictFortunnaTokenAddress(
+        uint256 poolProtoIdx,
+        address poolOwner,
+        bool isStakingOrReward
+    ) external view returns (address result, bytes32 salt);
+
+    function calculateFortunnaTokens(
+        uint256[2][] memory initialDepositAmounts,
+        address fortunnaTokenAddress
+    ) external view returns (uint256 amountToMint);
+
+    function FORTUNNA_TOKEN_PROTO_INDEX() external view returns (uint256);
 }

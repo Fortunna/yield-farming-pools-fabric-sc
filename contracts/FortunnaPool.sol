@@ -1,16 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.6 <=0.8.20;
 
+import "@openzeppelin/contracts-new/proxy/Clones.sol";
 import "@openzeppelin/contracts-new/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-new/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-new/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-new/token/ERC20/extensions/IERC20Metadata.sol";
 
+import "./interfaces/IFortunnaFactory.sol";
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./FactoryAuthorized.sol";
 
+import "@openzeppelin/contracts-new/utils/Address.sol";
+import "hardhat/console.sol";
+
 contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
+    using Clones for address;
     using SafeERC20 for IERC20;
     using SafeERC20 for IFortunnaToken;
     using FortunnaLib for bytes32;
@@ -48,19 +54,65 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     FortunnaLib.PoolParametersArrays internal vectorParams;
 
     function initialize(
-        address _stakingToken,
-        address _rewardToken,
+        address poolOwner,
         FortunnaLib.PoolParameters calldata poolParameters,
         FortunnaLib.PoolParametersArrays calldata poolParametersArrays
     ) external override initializer {
-        address __factory = _msgSender();
+        address sender = _msgSender();
+        IFortunnaFactory __factory = IFortunnaFactory(sender);
         scalarParams = poolParameters;
         vectorParams = poolParametersArrays;
-        super._initialize(__factory);
-        stakingToken = IFortunnaToken(_stakingToken);
-        rewardToken = IFortunnaToken(_rewardToken);
+        super._initialize(address(__factory));
+
+        (
+            address stakingTokenAddress,
+            bytes32 stakingTokenDeploySalt
+        ) = __factory.predictFortunnaTokenAddress(
+                poolParameters.protoPoolIdx,
+                poolOwner,
+                true
+            );
+
+        (address rewardTokenAddress, bytes32 rewardTokenDeploySalt) = __factory
+            .predictFortunnaTokenAddress(
+                poolParameters.protoPoolIdx,
+                poolOwner,
+                false
+            );
+
+        address fortunnaTokenPrototype = __factory.getPrototypeAt(
+            __factory.FORTUNNA_TOKEN_PROTO_INDEX()
+        );
+        fortunnaTokenPrototype.cloneDeterministic(stakingTokenDeploySalt);
+        fortunnaTokenPrototype.cloneDeterministic(rewardTokenDeploySalt);
+
+        console.log(
+            "stakingTokenAddress: ",
+            stakingTokenAddress,
+            Address.isContract(stakingTokenAddress)
+        );
+        stakingToken = IFortunnaToken(stakingTokenAddress);
+        rewardToken = IFortunnaToken(rewardTokenAddress);
+
         stakingToken.initialize(true, poolParameters, poolParametersArrays);
         rewardToken.initialize(false, poolParameters, poolParametersArrays);
+
+        uint256 amountToMint = __factory.calculateFortunnaTokens(
+            poolParametersArrays.initialDepositAmounts,
+            stakingTokenAddress
+        );
+        if (amountToMint > 0) {
+            stakingToken.mint(poolOwner, amountToMint);
+            amountToMint = 0;
+        }
+
+        amountToMint = __factory.calculateFortunnaTokens(
+            poolParametersArrays.initialRewardAmounts,
+            rewardTokenAddress
+        );
+        if (amountToMint > 0) {
+            rewardToken.mint(poolOwner, amountToMint);
+        }
     }
 
     function pendingRewards(address user) external view returns (uint256) {
