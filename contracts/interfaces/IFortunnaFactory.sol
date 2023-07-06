@@ -29,7 +29,7 @@ interface IFortunnaFactory is INativeTokenReceivable {
 
     /// @notice A public helper function to make mask generation quicker.
     /// @param flags An array of booleans to be converted to a mask.
-    function generateMaskForInitialRewardAmountsPair(
+    function generateMask(
         bool[] calldata flags
     ) external pure returns (bytes32);
 

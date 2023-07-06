@@ -89,7 +89,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     }
 
     /// @inheritdoc IFortunnaFactory
-    function generateMaskForInitialRewardAmountsPair(
+    function generateMask(
         bool[] calldata flags
     ) external pure override returns (bytes32) {
         return FortunnaBitMaskLib.getMaskFromBooleans(flags);
