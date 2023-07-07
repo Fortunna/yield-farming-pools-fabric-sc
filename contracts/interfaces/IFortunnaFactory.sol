@@ -66,20 +66,14 @@ interface IFortunnaFactory is INativeTokenReceivable {
     function getPrototypesLength() external view returns (uint256);
 
     function predictPoolAddress(
-        uint256 poolProtoIdx,
-        address poolOwner
+        uint256 poolProtoIdx
     ) external view returns (address result, bytes32 salt);
 
     function predictFortunnaTokenAddress(
         uint256 poolProtoIdx,
-        address poolOwner,
+        uint256 poolIdx,
         bool isStakingOrReward
     ) external view returns (address result, bytes32 salt);
-
-    function calculateFortunnaTokens(
-        uint256[2][] memory initialDepositAmounts,
-        address fortunnaTokenAddress
-    ) external view returns (uint256 amountToMint);
 
     function FORTUNNA_TOKEN_PROTO_INDEX() external view returns (uint256);
 }

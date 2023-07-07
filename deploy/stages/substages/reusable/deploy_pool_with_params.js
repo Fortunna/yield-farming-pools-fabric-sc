@@ -71,13 +71,6 @@ module.exports =
     const rewardTokensMask = await fortunnaFactoryInstance
       .generateMask(rewardTokensFlags);
 
-    const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
-      0, deployer, false
-    );
-    const [stakingFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
-      0, deployer, true
-    );
-
     const createPoolTxReceipt = await fortunnaFactoryInstance.createPool(
       [
         poolPrototypeIdx,
@@ -107,15 +100,25 @@ module.exports =
     const poolAddress = (await getEventBody("PoolCreated", fortunnaFactoryInstance)).pool;
     log(`Acquired pool address from the factory: ${poolAddress}`);
 
+    const pool = await hre.ethers.getContractAt(
+      hre.names.internal.fortunnaPool,
+      (await get(hre.names.internal.fortunnaPool)).address
+    );
+
+    const rewardFortunnaTokenAddress = await pool.rewardToken();
+    const stakingFortunnaTokenAddress = await pool.stakingToken();
+
     const rewardTokenInstance = await hre.ethers.getContractAt(
-      hre.names.internal.fortunnaToken,
+      "@openzeppelin/contracts-new/token/ERC20/IERC20.sol:IERC20",
       rewardFortunnaTokenAddress
     );
-    
     const stakingTokenInstance = await hre.ethers.getContractAt(
-      hre.names.internal.fortunnaToken,
+      "@openzeppelin/contracts-new/token/ERC20/IERC20.sol:IERC20",
       stakingFortunnaTokenAddress
     );
+
+    console.log(rewardFortunnaTokenAddress);
+    console.log(stakingFortunnaTokenAddress);
 
     await approveMaxAndReturnBalance(
       stakingTokenInstance, 

@@ -12,6 +12,8 @@ import "./interfaces/IFortunnaFactory.sol";
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/IFortunnaToken.sol";
 
+import "hardhat/console.sol";
+
 /// @title Canonical Fortunna Yield Farming pools factory
 /// @author Fortunna Team
 /// @notice Deploys Fortunna Yield Farming pools and manages ownership and control over pool protocol fees.
@@ -42,7 +44,6 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         address[] memory paymentTokens
     ) {
         address sender = _msgSender();
-        _grantRole(FortunnaLib.LP_MINTER_BURNER_ROLE, address(this));
         _grantRole(DEFAULT_ADMIN_ROLE, sender);
         _grantRole(FortunnaLib.POOL_REWARDS_PROVIDER, sender);
         _grantRole(FortunnaLib.ALLOWED_PAYMENT_TOKEN_ROLE, address(0));
@@ -211,45 +212,23 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     }
 
     function predictPoolAddress(
-        uint256 poolProtoIdx,
-        address poolOwner
+        uint256 poolProtoIdx
     ) public view override returns (address result, bytes32 salt) {
         address poolPrototypeAddress = prototypes.at(poolProtoIdx);
-        salt = keccak256(
-            abi.encodePacked(poolPrototypeAddress, poolOwner, pools.length())
-        );
-        result = Clones.predictDeterministicAddress(poolPrototypeAddress, salt);
+        salt = keccak256(abi.encodePacked(pools.length()));
+        result = poolPrototypeAddress.predictDeterministicAddress(salt);
     }
 
     function predictFortunnaTokenAddress(
         uint256 poolProtoIdx,
-        address poolOwner,
+        uint256 poolIdx,
         bool isStakingOrReward
     ) external view override returns (address result, bytes32 salt) {
-        address fortunnaTokenPrototype = prototypes.at(
-            FORTUNNA_TOKEN_PROTO_INDEX
-        );
-        (, bytes32 poolDeploySalt) = predictPoolAddress(
-            poolProtoIdx,
-            poolOwner
-        );
-        salt = keccak256(abi.encodePacked(poolDeploySalt, isStakingOrReward));
-        result = Clones.predictDeterministicAddress(
-            fortunnaTokenPrototype,
-            salt
-        );
-    }
-
-    function calculateFortunnaTokens(
-        uint256[2][] memory initialDepositAmounts,
-        address fortunnaTokenAddress
-    ) public view override returns (uint256 amountToMint) {
-        for (uint256 i = 0; i < initialDepositAmounts.length; i++) {
-            uint256[2] memory pair = initialDepositAmounts[i];
-            if (pair[1] == 0) continue;
-            amountToMint += IFortunnaToken(fortunnaTokenAddress)
-                .calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
-        }
+        salt = keccak256(abi.encodePacked(poolIdx, isStakingOrReward));
+        address fortunnaTokenPrototype = prototypes.at(FORTUNNA_TOKEN_PROTO_INDEX);
+        address tokenDeployer = prototypes.at(poolProtoIdx)
+            .predictDeterministicAddress(keccak256(abi.encodePacked(poolIdx)));
+        result = fortunnaTokenPrototype.predictDeterministicAddress(salt, tokenDeployer);
     }
 
     /// @inheritdoc IFortunnaFactory
@@ -282,9 +261,9 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
 
         bytes32 deploySalt;
         (pool, deploySalt) = predictPoolAddress(
-            poolParameters.protoPoolIdx,
-            sender
+            poolParameters.protoPoolIdx
         );
+        _grantRole(FortunnaLib.LP_MINTER_BURNER_ROLE, pool);
 
         if (!pools.add(pool)) {
             revert FortunnaErrorsLib.AddressAlreadyExists(pool);

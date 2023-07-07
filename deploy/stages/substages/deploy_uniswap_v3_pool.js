@@ -29,7 +29,7 @@ module.exports = deployPoolWithParams(
     );
 
     const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
-      1, deployer, true
+      1, 1, true
     );
 
     await execute(

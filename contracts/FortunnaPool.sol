@@ -64,54 +64,50 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         vectorParams = poolParametersArrays;
         super._initialize(address(__factory));
 
-        (
-            address stakingTokenAddress,
-            bytes32 stakingTokenDeploySalt
-        ) = __factory.predictFortunnaTokenAddress(
-                poolParameters.protoPoolIdx,
-                poolOwner,
-                true
-            );
-
-        (address rewardTokenAddress, bytes32 rewardTokenDeploySalt) = __factory
-            .predictFortunnaTokenAddress(
-                poolParameters.protoPoolIdx,
-                poolOwner,
-                false
-            );
-
+        uint256 poolIdx = __factory.getPoolsLength() - 1;
         address fortunnaTokenPrototype = __factory.getPrototypeAt(
             __factory.FORTUNNA_TOKEN_PROTO_INDEX()
         );
-        fortunnaTokenPrototype.cloneDeterministic(stakingTokenDeploySalt);
-        fortunnaTokenPrototype.cloneDeterministic(rewardTokenDeploySalt);
+        bytes32 stakingTokenDeploySalt = keccak256(abi.encodePacked(poolIdx, true));
+        bytes32 rewardTokenDeploySalt = keccak256(abi.encodePacked(poolIdx, false));
 
-        console.log(
-            "stakingTokenAddress: ",
-            stakingTokenAddress,
-            Address.isContract(stakingTokenAddress)
+        stakingToken = IFortunnaToken(
+            fortunnaTokenPrototype.cloneDeterministic(stakingTokenDeploySalt)
         );
-        stakingToken = IFortunnaToken(stakingTokenAddress);
-        rewardToken = IFortunnaToken(rewardTokenAddress);
-
+        rewardToken = IFortunnaToken(
+            fortunnaTokenPrototype.cloneDeterministic(rewardTokenDeploySalt)
+        );
+        console.log('r2', address(rewardToken));
         stakingToken.initialize(true, poolParameters, poolParametersArrays);
         rewardToken.initialize(false, poolParameters, poolParametersArrays);
 
-        uint256 amountToMint = __factory.calculateFortunnaTokens(
+        uint256 amountToMint = calculateFortunnaTokens(
             poolParametersArrays.initialDepositAmounts,
-            stakingTokenAddress
+            address(stakingToken)
         );
         if (amountToMint > 0) {
             stakingToken.mint(poolOwner, amountToMint);
             amountToMint = 0;
         }
 
-        amountToMint = __factory.calculateFortunnaTokens(
+        amountToMint = calculateFortunnaTokens(
             poolParametersArrays.initialRewardAmounts,
-            rewardTokenAddress
+            address(rewardToken)
         );
         if (amountToMint > 0) {
             rewardToken.mint(poolOwner, amountToMint);
+        }
+    }
+
+    function calculateFortunnaTokens(
+        uint256[2][] memory initialDepositAmounts,
+        address fortunnaTokenAddress
+    ) public view returns (uint256 amountToMint) {
+        for (uint256 i = 0; i < initialDepositAmounts.length; i++) {
+            uint256[2] memory pair = initialDepositAmounts[i];
+            if (pair[1] == 0) continue;
+            amountToMint += IFortunnaToken(fortunnaTokenAddress)
+                .calcFortunnaTokensInOrOutPerUnderlyingToken(i, pair[1]);
         }
     }
 
