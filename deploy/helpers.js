@@ -82,17 +82,6 @@ const grantRoles = async (
   }
 }
 
-const approveMaxAndReturnBalance = async (fortunnaToken, typeOfFortunnaToken, deployer, poolAddress, log) => {
-  const fortunnaTokenBalance = await fortunnaToken.balanceOf(deployer);
-  log(`Balance of fortunna token (${typeOfFortunnaToken}) acquired: ${hre.ethers.utils.formatUnits(fortunnaTokenBalance)}`);
-  if ((await fortunnaToken.allowance(deployer, poolAddress)).eq(hre.ethers.constants.Zero)) {
-    log('Allowance is lower than needed, approving the sum: 2**256...');
-    const fortunnaTokenApproveTxReceipt = await fortunnaToken.approve(poolAddress, hre.ethers.constants.MaxUint256);
-    await fortunnaTokenApproveTxReceipt.wait();
-  }
-  return fortunnaTokenBalance;
-}
-
 module.exports = {
   getMockToken,
   skipIfAlreadyDeployed,
@@ -103,6 +92,5 @@ module.exports = {
   POOL_DEPLOY_COST,
   DEAD_ADDRESS,
   grantRoles,
-  getEventBody,
-  approveMaxAndReturnBalance
+  getEventBody
 };

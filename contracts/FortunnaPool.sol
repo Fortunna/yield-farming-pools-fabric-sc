@@ -12,9 +12,6 @@ import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./FactoryAuthorized.sol";
 
-import "@openzeppelin/contracts-new/utils/Address.sol";
-import "hardhat/console.sol";
-
 contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     using Clones for address;
     using SafeERC20 for IERC20;
@@ -77,7 +74,6 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         rewardToken = IFortunnaToken(
             fortunnaTokenPrototype.cloneDeterministic(rewardTokenDeploySalt)
         );
-        console.log('r2', address(rewardToken));
         stakingToken.initialize(true, poolParameters, poolParametersArrays);
         rewardToken.initialize(false, poolParameters, poolParametersArrays);
 
@@ -294,9 +290,11 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         }
     }
 
-    function addExpectedRewardTokensBalanceToDistribute(
-        uint256 amount
-    ) external only(FortunnaLib.POOL_REWARDS_PROVIDER) {
+    function addExpectedRewardTokensBalanceToDistribute() 
+        external 
+        only(FortunnaLib.POOL_REWARDS_PROVIDER)
+    {
+        uint256 amount = rewardToken.balanceOf(_msgSender()); 
         expectedRewardTokensBalanceToDistribute += amount;
         emit RewardAdded(amount);
     }

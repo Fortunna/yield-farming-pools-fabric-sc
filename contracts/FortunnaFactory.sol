@@ -12,8 +12,6 @@ import "./interfaces/IFortunnaFactory.sol";
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/IFortunnaToken.sol";
 
-import "hardhat/console.sol";
-
 /// @title Canonical Fortunna Yield Farming pools factory
 /// @author Fortunna Team
 /// @notice Deploys Fortunna Yield Farming pools and manages ownership and control over pool protocol fees.

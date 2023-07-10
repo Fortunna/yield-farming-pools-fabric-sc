@@ -2,6 +2,7 @@ const hre = require('hardhat');
 const deployPoolWithParams = require("./reusable/deploy_pool_with_params");
 
 module.exports = deployPoolWithParams(
+  hre.names.internal.fortunnaUniswapV3Pool,
   1, // uniswap V3 fortunna pool
   30, 
   5, 
@@ -27,11 +28,9 @@ module.exports = deployPoolWithParams(
       hre.names.internal.fortunnaFactory,
       (await get(hre.names.internal.fortunnaFactory)).address
     );
-
     const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
       1, 1, true
     );
-
     await execute(
       hre.names.internal.productionTestToken,
       {from: deployer, log: true},
@@ -50,6 +49,9 @@ module.exports = deployPoolWithParams(
         nftPositionManagerAddress
       ]
     }
-  }  
+  },
+  async (poolAddress, poolArtifactName, log) => {
+    log(`Additional post actions are not required. Continue...`);
+  }
 );
 module.exports.tags = ["deploy_uniswap_v3_pool", "uniswap_v3_pool"];

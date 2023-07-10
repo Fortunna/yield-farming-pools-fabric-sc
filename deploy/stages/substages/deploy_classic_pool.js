@@ -1,44 +1,45 @@
 const hre = require('hardhat');
 const deployPoolWithParams = require("./reusable/deploy_pool_with_params");
-const { DEAD_ADDRESS } = require('../../helpers');
+const { DEAD_ADDRESS, getEventBody } = require('../../helpers');
 
 module.exports = deployPoolWithParams(
+  hre.names.internal.fortunnaPool,
   0, // classic fortunna pool
-  30, 
-  5, 
-  0, 
-  0, 
+  30,
+  5,
+  0,
+  0,
   1000,
   hre.ethers.utils.parseEther('0.1'), // min stake
   hre.ethers.utils.parseEther('9'), // max stake
+
   async ({
     deployments,
     getNamedAccounts
   }) => {
-    const {get, execute} = deployments;
-    const {deployer} = await getNamedAccounts();
+    const { get, execute } = deployments;
+    const { deployer } = await getNamedAccounts();
     const wethAddress = (await get(hre.names.external.weth)).address;
     const productionMockTokenAddress = (await get(hre.names.internal.productionTestToken)).address;
 
-    
+
     const fortunnaFactoryInstance = await hre.ethers.getContractAt(
       hre.names.internal.fortunnaFactory,
       (await get(hre.names.internal.fortunnaFactory)).address
-      );
-      
+    );
+
     const rewardAmountInMockTokens = hre.ethers.utils.parseEther('5');
     const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
       0, 0, false
     );
-    console.log('r1', rewardFortunnaTokenAddress);
     await execute(
       hre.names.internal.productionTestToken,
-      {from: deployer, log: true},
+      { from: deployer, log: true },
       'approve',
       rewardFortunnaTokenAddress,
       rewardAmountInMockTokens
     );
-    
+
     return {
       utilizingTokensAddresses: [productionMockTokenAddress, wethAddress],
       stakingTokensFlags: [true, true],
@@ -47,6 +48,24 @@ module.exports = deployPoolWithParams(
       initialDepositAmounts: [[0, hre.ethers.constants.Zero], [1, hre.ethers.constants.Zero]],
       customPoolParams: [DEAD_ADDRESS]
     }
-  }  
+  },
+
+  async (poolAddress, poolArtifactName, log) => {
+    const pool = await hre.ethers.getContractAt(
+      poolArtifactName,
+      poolAddress
+    );
+
+    log('Providing the rewards for the pool...');
+    const addExpectedRewardTxReceipt = await pool
+      .addExpectedRewardTokensBalanceToDistribute();
+    await addExpectedRewardTxReceipt.wait();
+    log(`Total reward amount: ${hre.ethers.utils.formatUnits((await getEventBody("RewardAdded", pool)).reward)}`);
+
+    const providePartOfTotalRewardsTxReceipt = await pool
+      .providePartOfTotalRewards();
+    await providePartOfTotalRewardsTxReceipt.wait();
+    log(`Part of reward ready to distribute: ${hre.ethers.utils.formatUnits((await getEventBody("PartDistributed", pool)).partOfTotalRewards)}`);
+  }
 );
 module.exports.tags = ["deploy_classic_pool", "pool"];

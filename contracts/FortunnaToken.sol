@@ -15,8 +15,6 @@ import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./interfaces/IFortunnaPool.sol";
 
-import "hardhat/console.sol";
-
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
     using FortunnaBitMaskLib for bytes32;
@@ -117,18 +115,6 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         uint256 underlyingTokenIdx,
         uint256 underlyingTokenAmountInOrOut
     ) public view override returns (uint256 fortunnaTokensAmountInOrOut) {
-        console.log(underlyingTokenAmountInOrOut);
-        console.log(totalSupply());
-        console.log(FortunnaLib.PRECISION);
-        console.log(getReserve[underlyingTokenIdx]);
-        console.log('---');
-        console.log(underlyingTokenAmountInOrOut *
-                totalSupply() *
-                FortunnaLib.PRECISION);
-        console.log((underlyingTokenAmountInOrOut *
-                totalSupply() *
-                FortunnaLib.PRECISION) / getReserve[underlyingTokenIdx]);
-        console.log(fortunnaTokensAmountInOrOut);
         fortunnaTokensAmountInOrOut =
             ((underlyingTokenAmountInOrOut *
                 totalSupply() *
