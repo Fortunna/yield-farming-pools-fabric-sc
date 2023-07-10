@@ -59,13 +59,24 @@ module.exports = async ({
     libraries
   });
 
-  await deploy(hre.names.internal.productionTestToken, {
+  await deploy(hre.names.internal.productionTestTokenA, {
     from: deployer,
     skipIfAlreadyDeployed,
     log: true,
     args: [
-      "Fortunna Test Token", 
-      "FTT", 
+      "Fortunna Test Token A", 
+      "FTA", 
+      hre.ethers.utils.parseEther('100000')
+    ]
+  });
+
+  await deploy(hre.names.internal.productionTestTokenB, {
+    from: deployer,
+    skipIfAlreadyDeployed,
+    log: true,
+    args: [
+      "Fortunna Test Token B", 
+      "FTB", 
       hre.ethers.utils.parseEther('100000')
     ]
   });

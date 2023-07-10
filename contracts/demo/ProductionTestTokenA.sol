@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.6 <=0.8.20;
 
-import "./mock/MockToken.sol";
+import "../mock/MockToken.sol";
 
-contract ProductionTestToken is MockToken {
+contract ProductionTestTokenA is MockToken {
     constructor(
         string memory name,
         string memory symbol,

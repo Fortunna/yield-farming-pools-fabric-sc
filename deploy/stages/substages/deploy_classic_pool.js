@@ -19,33 +19,59 @@ module.exports = deployPoolWithParams(
   }) => {
     const { get, execute } = deployments;
     const { deployer } = await getNamedAccounts();
-    const wethAddress = (await get(hre.names.external.weth)).address;
-    const productionMockTokenAddress = (await get(hre.names.internal.productionTestToken)).address;
-
+    const productionMockTokenAAddress = (await get(hre.names.internal.productionTestTokenA)).address;
+    const productionMockTokenBAddress = (await get(hre.names.internal.productionTestTokenB)).address;
 
     const fortunnaFactoryInstance = await hre.ethers.getContractAt(
       hre.names.internal.fortunnaFactory,
       (await get(hre.names.internal.fortunnaFactory)).address
     );
 
-    const rewardAmountInMockTokens = hre.ethers.utils.parseEther('5');
     const [rewardFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
       0, 0, false
     );
+    const [stakingFortunnaTokenAddress,] = await fortunnaFactoryInstance.predictFortunnaTokenAddress(
+      0, 0, true
+    );
+
     await execute(
-      hre.names.internal.productionTestToken,
+      hre.names.internal.productionTestTokenA,
       { from: deployer, log: true },
       'approve',
       rewardFortunnaTokenAddress,
-      rewardAmountInMockTokens
+      hre.ethers.constants.MaxInt256
+    );
+
+    await execute(
+      hre.names.internal.productionTestTokenB,
+      { from: deployer, log: true },
+      'approve',
+      rewardFortunnaTokenAddress,
+      hre.ethers.constants.MaxInt256
+    );
+
+    await execute(
+      hre.names.internal.productionTestTokenA,
+      { from: deployer, log: true },
+      'approve',
+      stakingFortunnaTokenAddress,
+      hre.ethers.constants.MaxInt256
+    );
+
+    await execute(
+      hre.names.internal.productionTestTokenB,
+      { from: deployer, log: true },
+      'approve',
+      stakingFortunnaTokenAddress,
+      hre.ethers.constants.MaxInt256
     );
 
     return {
-      utilizingTokensAddresses: [productionMockTokenAddress, wethAddress],
+      utilizingTokensAddresses: [productionMockTokenAAddress, productionMockTokenBAddress],
       stakingTokensFlags: [true, true],
-      rewardTokensFlags: [true, false],
-      initialRewardAmounts: [[0, rewardAmountInMockTokens], [1, hre.ethers.constants.Zero]],
-      initialDepositAmounts: [[0, hre.ethers.constants.Zero], [1, hre.ethers.constants.Zero]],
+      rewardTokensFlags: [true, true],
+      initialRewardAmounts: [[0, hre.ethers.utils.parseEther('5')], [1, hre.ethers.utils.parseEther('10')]],
+      initialDepositAmounts: [[0, hre.ethers.utils.parseEther('6')], [1, hre.ethers.utils.parseEther('9')]],
       customPoolParams: [DEAD_ADDRESS]
     }
   },

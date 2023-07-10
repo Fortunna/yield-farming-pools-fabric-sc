@@ -3,7 +3,9 @@ const {
   withImpersonatedSigner,
   mintNativeTokens,
   DEAD_ADDRESS,
+  getEventBody
 } = require('../deploy/helpers');
+const { expect } = require('chai');
 const { ethers, deployments, getNamedAccounts } = hre;
 const { get } = deployments;
 
@@ -30,18 +32,25 @@ describe("FortunnaPool", () => {
       hre.names.internal.fortunnaToken,
       await pool.stakingToken()
     );
+
   });
 
   it("Successful stake", async () => {
-    const balance = await stakingTokenInstance.balanceOf(deployer);
-    console.log(balance.toString());
-    const stakingTxReceipt = await pool.stake(balance);
-    console.log(stakingTxReceipt);
+    const amount = hre.ethers.utils.parseEther('1');
+    const stakingTxReceipt = await pool.stake(amount);
+    expect(stakingTxReceipt).to.emit("Staked", pool).withArgs(
+      deployer,
+      amount
+    );
   });
 
-  // it("Successful withdraw", async () => {
-
-  // });
+  it("Successful withdraw", async () => {
+    const amount = hre.ethers.utils.parseEther('1');
+    await pool.stake(amount);
+    const withdrawTxReceipt = await pool.withdraw(amount);
+    expect(withdrawTxReceipt).to.emit("Withdrawn", pool)
+      .withArgs(deployer, amount);
+  });
 
   // it("Successful getReward", async () => {
 

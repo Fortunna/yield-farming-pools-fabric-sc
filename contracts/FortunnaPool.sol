@@ -126,7 +126,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
 
     function _provideRewardTokens(uint256 amount) internal {
         amount += requestedRewardTokensToDistribute;
-        if (providedRewardTokensBalance > amount) {
+        if (amount < providedRewardTokensBalance) {
             revert FortunnaErrorsLib.NotEnoughRewardToDistribute(
                 providedRewardTokensBalance,
                 requestedRewardTokensToDistribute
