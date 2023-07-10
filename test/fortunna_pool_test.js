@@ -1,29 +1,49 @@
 const hre = require("hardhat");
 const {
-  withImpersonatedSigner, 
-  mintNativeTokens, 
+  withImpersonatedSigner,
+  mintNativeTokens,
   DEAD_ADDRESS,
 } = require('../deploy/helpers');
-const {ethers, deployments, getNamedAccounts} = hre;
+const { ethers, deployments, getNamedAccounts } = hre;
+const { get } = deployments;
 
 describe("FortunnaPool", () => {
+  let deployer;
 
-    beforeEach(async () => {
-        await deployments.fixture(['debug']);
-        // const accounts = await getNamedAccounts();
-        // [<some signers from accounts>] = await ethers.getSigners();
-        
-        // someInternalContract = await ethers.getContractAt(
-        //     hre.names.internal.someInternalContract, 
-        //     (await deployments.get(hre.names.internal.someInternalContract)).address
-        // );
-        // someExternalContract = await ethers.getContractAt(
-        //     hre.names.internal.someExternalContract,
-        //     (await deployments.get(hre.names.external.someExternalContract)).address
-        // );
-    });
+  let pool;
+  let rewardTokenInstance;
+  let stakingTokenInstance;
 
-    it("Successful something", async() => {
+  beforeEach(async () => {
+    await deployments.fixture(['debug']);
+    const accounts = await getNamedAccounts();
+    deployer = accounts.deployer;
+    pool = await hre.ethers.getContractAt(
+      hre.names.internal.fortunnaPool,
+      (await get(hre.names.internal.fortunnaPool + "_Clone")).address
+    );
+    rewardTokenInstance = await hre.ethers.getContractAt(
+      hre.names.internal.fortunnaToken,
+      await pool.rewardToken()
+    );
+    stakingTokenInstance = await hre.ethers.getContractAt(
+      hre.names.internal.fortunnaToken,
+      await pool.stakingToken()
+    );
+  });
 
-    });
+  it("Successful stake", async () => {
+    const balance = await stakingTokenInstance.balanceOf(deployer);
+    console.log(balance.toString());
+    const stakingTxReceipt = await pool.stake(balance);
+    console.log(stakingTxReceipt);
+  });
+
+  // it("Successful withdraw", async () => {
+
+  // });
+
+  // it("Successful getReward", async () => {
+
+  // });
 });

@@ -248,8 +248,9 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         }
 
         _safeRewardTransfer(sender, pending);
-        requestedRewardTokensToDistribute -= pending + fee;
-        providedRewardTokensBalance -= pending + fee;
+        uint256 pendingAndFee = pending + fee;
+        requestedRewardTokensToDistribute -= pendingAndFee;
+        providedRewardTokensBalance -= pendingAndFee;
     }
 
     function getReward() external nonReentrant {

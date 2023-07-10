@@ -16,13 +16,14 @@ module.exports =
 
     const pool = await hre.ethers.getContractAt(
       poolArtifactName,
-      (await get(poolArtifactName)).address
+      (await get(poolArtifactName + "_Clone")).address
     );
+
     log('Starting checks if approvals required.');
     for (const tokenAddress of tokensAddresses) {
       const token = await (
         await hre.ethers.getContractAt(
-          "@openzeppelin/contracts-new/token/ERC20/IERC20.sol:IERC20",
+          "@openzeppelin/contracts-new/token/ERC20/extensions/IERC20Metadata.sol:IERC20Metadata",
           tokenAddress
         )
       ).deployed();

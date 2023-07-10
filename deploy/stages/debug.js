@@ -7,6 +7,7 @@ module.exports.dependencies = [
   "main",
   "pool",
   "uniswap_v3_pool",
+  "approvals_u3",
   "update_tracer_names"
 ];
 module.exports.runAtTheEnd = true;

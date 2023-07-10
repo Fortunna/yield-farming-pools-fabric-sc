@@ -17,5 +17,11 @@ module.exports = async ({
     save,
     log
   );
+  await getFakeDeployment(
+    "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    hre.names.external.usdt,
+    save,
+    log
+  );
 }
 module.exports.tags = ["inject_external_contracts", "external"];

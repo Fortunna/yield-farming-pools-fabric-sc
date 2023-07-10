@@ -1,5 +1,5 @@
 const hre = require('hardhat');
-const { POOL_DEPLOY_COST, grantRoles, getEventBody, approveMaxAndReturnBalance, DEAD_ADDRESS } = require("../../../helpers");
+const { POOL_DEPLOY_COST, grantRoles, getEventBody, getFakeDeployment } = require("../../../helpers");
 
 module.exports =
   (
@@ -28,7 +28,7 @@ module.exports =
     const initialDepositAmounts = utilizingTokensAndListsOfFlagsDTO.initialDepositAmounts;
     const customPoolParams = utilizingTokensAndListsOfFlagsDTO.customPoolParams;
 
-    const { log, execute, get } = deployments;
+    const { log, execute, get, save } = deployments;
     const { deployer } = await getNamedAccounts();
 
     const dayInSec = 3600 * 24;
@@ -100,7 +100,13 @@ module.exports =
     await createPoolTxReceipt.wait();
     
     const poolAddress = (await getEventBody("PoolCreated", fortunnaFactoryInstance)).pool;
+    await getFakeDeployment(
+      poolAddress,
+      poolArtifactName + "_Clone",
+      save,
+      log
+    );
+
     log(`Acquired pool address from the factory: ${poolAddress}`);
-    
     await postPoolDeployActions(poolAddress, poolArtifactName, log);
   }

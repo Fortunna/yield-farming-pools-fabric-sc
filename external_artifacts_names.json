@@ -1,4 +1,5 @@
 {
+    "usdt": "USDT",
     "weth": "WETH",
     "nftPositionManager": "NonfungiblePositionManager"
 }
