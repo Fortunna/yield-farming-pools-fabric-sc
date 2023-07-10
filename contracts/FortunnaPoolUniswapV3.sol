@@ -34,7 +34,7 @@ contract FortunnaPoolUniswapV3 is
         uint256 lastDepositTime;
     }
 
-    address internal immutable __self = address(this);
+    address private immutable __self = address(this);
 
     uint24 public constant POOL_FEE = 3000;
     uint256 public constant REWARDS_DURATION = 12 hours;
@@ -129,8 +129,8 @@ contract FortunnaPoolUniswapV3 is
     /// @notice Withdraws all tokens deposited by the user and gets rewards for him.
     /// @dev Withdrawal comission is the same as for the `withdraw()` function.
     function exit() external delegatedOnly whenNotPaused {
-        withdraw(depositsInfo[_msgSender()].balance);
         getReward();
+        withdraw(depositsInfo[_msgSender()].balance);
     }
 
     /// @notice Withdraws desired amount of deposited tokens for the user.
