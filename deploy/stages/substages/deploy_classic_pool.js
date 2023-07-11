@@ -3,13 +3,13 @@ const deployPoolWithParams = require("./reusable/deploy_pool_with_params");
 const { DEAD_ADDRESS, getEventBody } = require('../../helpers');
 
 module.exports = deployPoolWithParams(
-  hre.names.internal.fortunnaPool,
+  hre.names.internal.fortunnaPool, // artifact name
   0, // classic fortunna pool
-  30,
-  5,
-  0,
-  0,
-  1000,
+  30, // how many days the pool will distribute a reward
+  5, // how many days the get rewards would be under the fee
+  0, // bp fee of early withdrawal fee
+  0, // deposit/witdhraw fee
+  1000, // total rewards bp per distribution cycle
   hre.ethers.utils.parseEther('0.1'), // min stake
   hre.ethers.utils.parseEther('9'), // max stake
 

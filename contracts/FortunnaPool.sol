@@ -36,6 +36,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
 
     uint256 public lastRewardTimestamp;
     uint256 public accRewardTokenPerShare;
+    uint256 public distributionCycleDuration;
 
     uint256 public rewardTokensPerSec;
 
@@ -125,14 +126,13 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
     }
 
     function _provideRewardTokens(uint256 amount) internal {
-        amount += requestedRewardTokensToDistribute;
-        if (amount < providedRewardTokensBalance) {
+        requestedRewardTokensToDistribute += amount;
+        if (requestedRewardTokensToDistribute > providedRewardTokensBalance) {
             revert FortunnaErrorsLib.NotEnoughRewardToDistribute(
                 providedRewardTokensBalance,
                 requestedRewardTokensToDistribute
             );
         }
-        requestedRewardTokensToDistribute = amount;
     }
 
     function updatePool() public {
@@ -248,6 +248,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         }
 
         _safeRewardTransfer(sender, pending);
+        emit RewardPaid(sender, pending);
         uint256 pendingAndFee = pending + fee;
         requestedRewardTokensToDistribute -= pendingAndFee;
         providedRewardTokensBalance -= pendingAndFee;
@@ -309,6 +310,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
             FortunnaLib.BASE_POINTS_MAX;
         rewardToken.safeTransferFrom(_msgSender(), address(this), amount);
         providedRewardTokensBalance += amount;
+        rewardTokensPerSec = providedRewardTokensBalance / (scalarParams.endTimestamp - scalarParams.startTimestamp);
         emit PartDistributed(amount);
     }
 

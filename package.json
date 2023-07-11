@@ -38,5 +38,8 @@
     "solhint": "^3.3.7",
     "solidity-coverage": "^0.7.21"
   },
-  "packageManager": "yarn@3.6.0"
+  "packageManager": "yarn@3.6.0",
+  "dependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8"
+  }
 }

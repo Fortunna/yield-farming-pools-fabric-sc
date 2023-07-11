@@ -8,6 +8,7 @@ const {
 const { expect } = require('chai');
 const { ethers, deployments, getNamedAccounts } = hre;
 const { get } = deployments;
+const { time } = require('@nomicfoundation/hardhat-network-helpers');
 
 describe("FortunnaPool", () => {
   let deployer;
@@ -32,7 +33,6 @@ describe("FortunnaPool", () => {
       hre.names.internal.fortunnaToken,
       await pool.stakingToken()
     );
-
   });
 
   it("Successful stake", async () => {
@@ -52,7 +52,14 @@ describe("FortunnaPool", () => {
       .withArgs(deployer, amount);
   });
 
-  // it("Successful getReward", async () => {
-
-  // });
+  it("Successful getReward", async () => {
+    const amount = hre.ethers.utils.parseEther('1');
+    await pool.stake(amount);
+    await time.increase(3600 * 24 * 15);
+    const getRewardTxReceipt = await pool.getReward();
+    const expectedRewards = await pool.pendingRewards(deployer);
+    expect(expectedRewards).to.be.greaterThan(0);
+    expect(getRewardTxReceipt).to.emit("RewardPaid", pool)
+      .withArgs(deployer, expectedRewards);
+  });
 });
