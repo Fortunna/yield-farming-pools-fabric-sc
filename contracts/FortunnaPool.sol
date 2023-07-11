@@ -252,6 +252,7 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         uint256 pendingAndFee = pending + fee;
         requestedRewardTokensToDistribute -= pendingAndFee;
         providedRewardTokensBalance -= pendingAndFee;
+        _recalcTokensPerSec();
     }
 
     function getReward() external nonReentrant {
@@ -310,8 +311,12 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
             FortunnaLib.BASE_POINTS_MAX;
         rewardToken.safeTransferFrom(_msgSender(), address(this), amount);
         providedRewardTokensBalance += amount;
-        rewardTokensPerSec = providedRewardTokensBalance / (scalarParams.endTimestamp - scalarParams.startTimestamp);
+        _recalcTokensPerSec();
         emit PartDistributed(amount);
+    }
+
+    function _recalcTokensPerSec() internal {
+        rewardTokensPerSec = providedRewardTokensBalance / (scalarParams.endTimestamp - scalarParams.startTimestamp);
     }
 
     function _safeRewardTransfer(address to, uint256 amount) internal {
