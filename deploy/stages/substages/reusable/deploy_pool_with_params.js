@@ -73,7 +73,10 @@ module.exports =
     const rewardTokensMask = await fortunnaFactoryInstance
       .generateMask(rewardTokensFlags);
 
-    const createPoolTxReceipt = await fortunnaFactoryInstance.createPool(
+    await execute(
+      hre.names.internal.fortunnaFactory,
+      {from: deployer, log: true, value: POOL_DEPLOY_COST},
+      "createPool",
       [
         poolPrototypeIdx,
         startTimestamp,
@@ -92,13 +95,8 @@ module.exports =
         utilizingTokensAddresses,
         initialRewardAmounts,
         initialDepositAmounts
-      ],
-      {
-        value: POOL_DEPLOY_COST
-      }
+      ]
     );
-    await createPoolTxReceipt.wait();
-    
     const poolAddress = (await getEventBody("PoolCreated", fortunnaFactoryInstance)).pool;
     await getFakeDeployment(
       poolAddress,

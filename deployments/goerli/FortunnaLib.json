@@ -1,0 +1,205 @@
+{
+  "address": "0x2475181E30FcFFA7A636eDc469BE56d9080F4A8c",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ALLOWED_EXTERNAL_TOKEN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ALLOWED_PAYMENT_TOKEN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ALLOWED_REWARD_TOKEN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ALLOWED_STAKING_TOKEN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BANNED_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BASE_POINTS_MAX",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEAD_ADDRESS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "LP_MINTER_BURNER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "POOL_REWARDS_PROVIDER",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PRECISION",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xfb318828fae2934756fbbd81ca0275c347f9b77fc7b0902b7059d8d8763052ae",
+  "receipt": {
+    "to": null,
+    "from": "0x57eb63d0aab5822EFCd7A9B56775F772D3e03CfD",
+    "contractAddress": "0x2475181E30FcFFA7A636eDc469BE56d9080F4A8c",
+    "transactionIndex": 43,
+    "gasUsed": "176701",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xf1b1b096dc73ddd56dc179e07f2e7941180a0ad41698468b7030a25bb8e4b5f3",
+    "transactionHash": "0xfb318828fae2934756fbbd81ca0275c347f9b77fc7b0902b7059d8d8763052ae",
+    "logs": [],
+    "blockNumber": 9334353,
+    "cumulativeGasUsed": "17559484",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "aeaddf74af60a7807e4fa05d48438315",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"ALLOWED_EXTERNAL_TOKEN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"ALLOWED_PAYMENT_TOKEN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"ALLOWED_REWARD_TOKEN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"ALLOWED_STAKING_TOKEN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"BANNED_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"BASE_POINTS_MAX\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEAD_ADDRESS\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"LP_MINTER_BURNER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"POOL_REWARDS_PROVIDER\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"PRECISION\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Fortunna Team\",\"kind\":\"dev\",\"methods\":{},\"title\":\"Canonical Fortunna Yield Farming pools lib\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"ALLOWED_EXTERNAL_TOKEN_ROLE()\":{\"notice\":\"A role hash to mark addresses to be held as external reward tokens from another protocols.\"},\"ALLOWED_PAYMENT_TOKEN_ROLE()\":{\"notice\":\"A role hash to mark addresses to be held as payment for pool deploy tokens.\"},\"ALLOWED_REWARD_TOKEN_ROLE()\":{\"notice\":\"A role hash to mark addresses to be held as reward tokens.\"},\"ALLOWED_STAKING_TOKEN_ROLE()\":{\"notice\":\"A role hash to mark addresses to be held as staking tokens.\"},\"BANNED_ROLE()\":{\"notice\":\"A role hash to mark addresses to be held as banned users.\"},\"BASE_POINTS_MAX()\":{\"notice\":\"A max of base points. (ex. Like 100 in percents)\"},\"DEAD_ADDRESS()\":{\"notice\":\"A dead address for floor tokens to be minted\"},\"LP_MINTER_BURNER_ROLE()\":{\"notice\":\"A role hash to indicate who can mint and burn the `FortunnaToken`'s.\"},\"POOL_REWARDS_PROVIDER()\":{\"notice\":\"A role hash to indicate who can mint and burn the `FortunnaToken`'s.\"},\"PRECISION()\":{\"notice\":\"A given precision for math operations;\"}},\"notice\":\"A lib holding default errors, helpers functions and constants.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/libraries/FortunnaLib.sol\":\"FortunnaLib\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/libraries/FortunnaLib.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity >=0.7.6 <=0.8.20;\\n\\n/// @title Canonical Fortunna Yield Farming pools lib\\n/// @author Fortunna Team\\n/// @notice A lib holding default errors, helpers functions and constants.\\nlibrary FortunnaLib {\\n    struct CustomPoolParameters {\\n        address nonfungiblePositionManager;\\n    }\\n\\n    /// @dev A struct to hold pools scalar deploy parameters.\\n    struct PoolParameters {\\n        // An index of pool prototype in the factory list of prototypes.\\n        uint256 protoPoolIdx;\\n        // Start of the pool reward distribution period.\\n        uint256 startTimestamp;\\n        // End of the pool reward distribution period.\\n        uint256 endTimestamp;\\n        // Minimal amount for user to be able to deposit to the pool.\\n        uint256 minStakeAmount;\\n        // Maximal amount for user to be able to deposit to the pool.\\n        uint256 maxStakeAmount;\\n        // A time duration in seconds for a user to wait until they could receiver their rewards.\\n        uint256 minLockUpRewardsPeriod;\\n        // A fee amount in base points to be charged from user if they would attempt to receiver their rewards.\\n        uint256 earlyWithdrawalFeeBasePoints;\\n        // A fee amount in base points to be charged from user if they would attempt to perform deposit/withdraw.\\n        uint256 depositWithdrawFeeBasePoints;\\n        // A percent from total reward provided being distributed to stakers.\\n        uint256 totalRewardBasePointsPerDistribution;\\n        // A bit mask to indicate whether the token in `utilizingTokens` is staking token.\\n        bytes32 stakingTokensMask;\\n        // A bit mask to indicate whether the token in `utilizingTokens` is reward token.\\n        bytes32 rewardTokensMask;\\n        CustomPoolParameters custom;\\n    }\\n\\n    /// @dev A struct to hold pools vector deploy parameters.\\n    struct PoolParametersArrays {\\n        // An array of tokens to be used as either reward or staking tokens.\\n        address[] utilizingTokens;\\n        // Array of pairs <index of reward token, initial total reward amount>\\n        uint256[2][] initialRewardAmounts;\\n        // An array of pairs <index of staking token, deposit amount>\\n        uint256[2][] initialDepositAmounts;\\n    }\\n\\n    /// @dev A struct to hold a pay info for pool deployment.\\n    struct PaymentInfo {\\n        // A token address to be accepted as payment.\\n        address paymentToken;\\n        // A payment amount for pool deploy.\\n        uint256 cost;\\n    }\\n\\n    /// @notice A role hash to mark addresses to be held as reward tokens.\\n    bytes32 public constant ALLOWED_REWARD_TOKEN_ROLE =\\n        keccak256(\\\"ALLOWED_REWARD_TOKEN_ROLE\\\");\\n\\n    /// @notice A role hash to mark addresses to be held as staking tokens.\\n    bytes32 public constant ALLOWED_STAKING_TOKEN_ROLE =\\n        keccak256(\\\"ALLOWED_STAKING_TOKEN_ROLE\\\");\\n\\n    /// @notice A role hash to mark addresses to be held as external reward tokens from another protocols.\\n    bytes32 public constant ALLOWED_EXTERNAL_TOKEN_ROLE =\\n        keccak256(\\\"ALLOWED_EXTERNAL_TOKEN_ROLE\\\");\\n\\n    /// @notice A role hash to mark addresses to be held as banned users.\\n    bytes32 public constant BANNED_ROLE = keccak256(\\\"BANNED_ROLE\\\");\\n\\n    /// @notice A role hash to mark addresses to be held as payment for pool deploy tokens.\\n    bytes32 public constant ALLOWED_PAYMENT_TOKEN_ROLE =\\n        keccak256(\\\"ALLOWED_PAYMENT_TOKEN_ROLE\\\");\\n\\n    /// @notice A role hash to indicate who can mint and burn the `FortunnaToken`'s.\\n    bytes32 public constant LP_MINTER_BURNER_ROLE =\\n        keccak256(\\\"LP_MINTER_BURNER_ROLE\\\");\\n\\n    /// @notice A role hash to indicate who can mint and burn the `FortunnaToken`'s.\\n    bytes32 public constant POOL_REWARDS_PROVIDER =\\n        keccak256(\\\"POOL_REWARDS_PROVIDER\\\");\\n\\n    /// @notice A max of base points. (ex. Like 100 in percents)\\n    uint256 public constant BASE_POINTS_MAX = 10000;\\n\\n    /// @notice A given precision for math operations;\\n    uint256 public constant PRECISION = 1e10;\\n\\n    /// @notice A dead address for floor tokens to be minted\\n    address public constant DEAD_ADDRESS =\\n        0x000000000000000000000000000000000000dEaD;\\n}\\n\",\"keccak256\":\"0xe34fa79ce27c6c8ea345c75f491543c8748672a30e5cddd3ab28e31b6db47327\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x61023a610035600b8282823980515f1a60731461002957634e487b7160e01b5f525f60045260245ffd5b305f52607381538281f3fe73000000000000000000000000000000000000000030146080604052600436106100a6575f3560e01c8063aaf5eb681161006e578063aaf5eb681461017a578063afd4138c14610186578063dcb6b0d01461018f578063f86b8d55146101b6578063feedbbd0146101dd575f80fd5b806319c3c90c146100aa5780632a07c57c146100e45780632e9c39431461010b5780633d0c4c0f146101325780634e6fd6c414610159575b5f80fd5b6100d17f508ce835b993083d562083854a88de07ecc701522f232cada7863173dfc40df381565b6040519081526020015b60405180910390f35b6100d17ff2006e6ab5b724adc71b981e8b898a8359b6397c6778f9a7aa161ce3e24fee4481565b6100d17fa13b5fd39f62a16c47923a1b238b123e180d525e88a29febb32fa41cabad579881565b6100d17f8e7eec3a91568ea051efb6d35e7514ef01e4807481274e632bc3d6a704427c5881565b61016261dead81565b6040516001600160a01b0390911681526020016100db565b6100d16402540be40081565b6100d161271081565b6100d17f185fa0fa3354ff548ee95bc7375967e5e2cdbd00e7211f15ee5ea68c1d5dbae581565b6100d17f3735310f7cbb434a4412bb30a00c71d49f056e4bfe5a28c0b8c295a228fbbbde81565b6100d17f887501d93d651d0c9fdbe85f9da87d0d1fd1b1e2fa77767b6129c0bf474923ac8156fea264697066735822122083b018910160420f62f98382fcf2233e9cb8b304a87828ee24dfc5c968ca3e1464736f6c63430008140033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600436106100a6575f3560e01c8063aaf5eb681161006e578063aaf5eb681461017a578063afd4138c14610186578063dcb6b0d01461018f578063f86b8d55146101b6578063feedbbd0146101dd575f80fd5b806319c3c90c146100aa5780632a07c57c146100e45780632e9c39431461010b5780633d0c4c0f146101325780634e6fd6c414610159575b5f80fd5b6100d17f508ce835b993083d562083854a88de07ecc701522f232cada7863173dfc40df381565b6040519081526020015b60405180910390f35b6100d17ff2006e6ab5b724adc71b981e8b898a8359b6397c6778f9a7aa161ce3e24fee4481565b6100d17fa13b5fd39f62a16c47923a1b238b123e180d525e88a29febb32fa41cabad579881565b6100d17f8e7eec3a91568ea051efb6d35e7514ef01e4807481274e632bc3d6a704427c5881565b61016261dead81565b6040516001600160a01b0390911681526020016100db565b6100d16402540be40081565b6100d161271081565b6100d17f185fa0fa3354ff548ee95bc7375967e5e2cdbd00e7211f15ee5ea68c1d5dbae581565b6100d17f3735310f7cbb434a4412bb30a00c71d49f056e4bfe5a28c0b8c295a228fbbbde81565b6100d17f887501d93d651d0c9fdbe85f9da87d0d1fd1b1e2fa77767b6129c0bf474923ac8156fea264697066735822122083b018910160420f62f98382fcf2233e9cb8b304a87828ee24dfc5c968ca3e1464736f6c63430008140033",
+  "devdoc": {
+    "author": "Fortunna Team",
+    "kind": "dev",
+    "methods": {},
+    "title": "Canonical Fortunna Yield Farming pools lib",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "ALLOWED_EXTERNAL_TOKEN_ROLE()": {
+        "notice": "A role hash to mark addresses to be held as external reward tokens from another protocols."
+      },
+      "ALLOWED_PAYMENT_TOKEN_ROLE()": {
+        "notice": "A role hash to mark addresses to be held as payment for pool deploy tokens."
+      },
+      "ALLOWED_REWARD_TOKEN_ROLE()": {
+        "notice": "A role hash to mark addresses to be held as reward tokens."
+      },
+      "ALLOWED_STAKING_TOKEN_ROLE()": {
+        "notice": "A role hash to mark addresses to be held as staking tokens."
+      },
+      "BANNED_ROLE()": {
+        "notice": "A role hash to mark addresses to be held as banned users."
+      },
+      "BASE_POINTS_MAX()": {
+        "notice": "A max of base points. (ex. Like 100 in percents)"
+      },
+      "DEAD_ADDRESS()": {
+        "notice": "A dead address for floor tokens to be minted"
+      },
+      "LP_MINTER_BURNER_ROLE()": {
+        "notice": "A role hash to indicate who can mint and burn the `FortunnaToken`'s."
+      },
+      "POOL_REWARDS_PROVIDER()": {
+        "notice": "A role hash to indicate who can mint and burn the `FortunnaToken`'s."
+      },
+      "PRECISION()": {
+        "notice": "A given precision for math operations;"
+      }
+    },
+    "notice": "A lib holding default errors, helpers functions and constants.",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

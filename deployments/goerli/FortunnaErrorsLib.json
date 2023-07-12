@@ -1,0 +1,418 @@
+{
+  "address": "0xC96e03cdB3CF495f1Bc063A1D161507Db5791542",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "entity",
+          "type": "address"
+        }
+      ],
+      "name": "AddressAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "comment",
+          "type": "string"
+        }
+      ],
+      "name": "AreNotEqual",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Banned",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "timeDifference",
+          "type": "uint256"
+        }
+      ],
+      "name": "DistributionEnded",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "timeDifference",
+          "type": "uint256"
+        }
+      ],
+      "name": "DistributionNotStarted",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "chainId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ForeignChainId",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "basePoints",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "comment",
+          "type": "string"
+        }
+      ],
+      "name": "IncorrectBasePoints",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "finish",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "comment",
+          "type": "string"
+        }
+      ],
+      "name": "IncorrectInterval",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "comment",
+          "type": "string"
+        }
+      ],
+      "name": "InvalidLength",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "scalar",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "comment",
+          "type": "string"
+        }
+      ],
+      "name": "InvalidScalar",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "amounts",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "InvalidWeightedInput",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "entity",
+          "type": "address"
+        }
+      ],
+      "name": "NotAuthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "provided",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "NotEnoughRewardToDistribute",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "NotEnoughStaked",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "NotEnoughtPayment",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotImplemented",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "someAddress",
+          "type": "address"
+        }
+      ],
+      "name": "NotUniqueAddresses",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "TooMuchStaked",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "prototypeIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "UnknownPrototypeIndex",
+      "type": "error"
+    }
+  ],
+  "transactionHash": "0xad7d4f1cc250f951f44d44d1ad4de2b6e8ac74c51490338a8b919e1e91a9972d",
+  "receipt": {
+    "to": null,
+    "from": "0x57eb63d0aab5822EFCd7A9B56775F772D3e03CfD",
+    "contractAddress": "0xC96e03cdB3CF495f1Bc063A1D161507Db5791542",
+    "transactionIndex": 46,
+    "gasUsed": "71998",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xa8983dd58f08acbb845941a63c57eca2fc8b29501355715b109f0b728ca9c93f",
+    "transactionHash": "0xad7d4f1cc250f951f44d44d1ad4de2b6e8ac74c51490338a8b919e1e91a9972d",
+    "logs": [],
+    "blockNumber": 9334367,
+    "cumulativeGasUsed": "15441851",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "c606527edc352ff35406216236e37da4",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"entity\",\"type\":\"address\"}],\"name\":\"AddressAlreadyExists\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"comment\",\"type\":\"string\"}],\"name\":\"AreNotEqual\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Banned\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"timeDifference\",\"type\":\"uint256\"}],\"name\":\"DistributionEnded\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"timeDifference\",\"type\":\"uint256\"}],\"name\":\"DistributionNotStarted\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"name\":\"ForeignChainId\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"basePoints\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"comment\",\"type\":\"string\"}],\"name\":\"IncorrectBasePoints\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"start\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"finish\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"comment\",\"type\":\"string\"}],\"name\":\"IncorrectInterval\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"comment\",\"type\":\"string\"}],\"name\":\"InvalidLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"scalar\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"comment\",\"type\":\"string\"}],\"name\":\"InvalidScalar\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"}],\"name\":\"InvalidWeightedInput\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"entity\",\"type\":\"address\"}],\"name\":\"NotAuthorized\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"provided\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"actual\",\"type\":\"uint256\"}],\"name\":\"NotEnoughRewardToDistribute\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"NotEnoughStaked\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"NotEnoughtPayment\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotImplemented\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitialized\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"someAddress\",\"type\":\"address\"}],\"name\":\"NotUniqueAddresses\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"TooMuchStaked\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"prototypeIndex\",\"type\":\"uint256\"}],\"name\":\"UnknownPrototypeIndex\",\"type\":\"error\"}],\"devdoc\":{\"author\":\"Fortunna Team\",\"errors\":{\"AddressAlreadyExists(address)\":[{\"details\":\"An error to be reverted if an `enity` is already exists in some address set.\",\"params\":{\"entity\":\"An entity address.\"}}],\"AreNotEqual(uint256,uint256,string)\":[{\"details\":\"An error to be reverted if some pair of scalars is not equal, but they should be.\",\"params\":{\"comment\":\"Some comment as to what kind of a data structure property this is.\",\"x\":\"A first scalar.\",\"y\":\"A second scalar.\"}}],\"Banned(address)\":[{\"details\":\"An error to be reverted if an `account` would be banned.\",\"params\":{\"account\":\"A banned user.\"}}],\"ForeignChainId(uint256)\":[{\"details\":\"An error to be reverted if the contract is being deployed at a wrong chain.\",\"params\":{\"chainId\":\"An actual chain ID.\"}}],\"IncorrectBasePoints(uint256,string)\":[{\"details\":\"An error to be reverted if some base points were defined out of their boundaries.\",\"params\":{\"basePoints\":\"An actual base points amount.\",\"comment\":\"Some comment as to what kind of a base points this is.\"}}],\"IncorrectInterval(uint256,uint256,string)\":[{\"details\":\"An error to be reverted if some Euclidean interval hasn't been defined correctly.\",\"params\":{\"comment\":\"Some comment as to what kind of an interval this is.\",\"finish\":\"An end of the interval.\",\"start\":\"A start of the interval.\"}}],\"InvalidLength(uint256,string)\":[{\"details\":\"An error to be reverted if some data structures `length` is not defined correctly.\",\"params\":{\"comment\":\"Some comment as to what kind of a data structure has been addressed to.\",\"length\":\"An actual length of the data structure.\"}}],\"InvalidScalar(uint256,string)\":[{\"details\":\"An error to be reverted if some scalar property of the data structure was addressed wrongly.\",\"params\":{\"comment\":\"Some comment as to what kind of a data structure property this is.\",\"scalar\":\"A scalar.\"}}],\"NotAuthorized(bytes32,address)\":[{\"details\":\"An error to be reverted if an `entity` does not possess the `role`.\",\"params\":{\"entity\":\"An entity violating authorization.\",\"role\":\"A role an entity doesn't posess.\"}}],\"NotEnoughtPayment(uint256)\":[{\"details\":\"An error to be reverted if the pool deployer didn't payed enough for it.\",\"params\":{\"amount\":\"An actual amount the deployer sent.\"}}],\"NotInitialized()\":[{\"details\":\"An error to be reverted if the contract was being called before the initialization.\"}],\"NotUniqueAddresses(address)\":[{\"details\":\"An error to be reverted if in some two addresses arrays the elements aren't unique.\",\"params\":{\"someAddress\":\"An address which is equal in both arrays.\"}}],\"UnknownPrototypeIndex(uint256)\":[{\"details\":\"An error to be reverted if an unknown prototype name would be used to deploy a pool or other utility smart-contract.\",\"params\":{\"prototypeIndex\":\"An index of prototype smart-contract.\"}}]},\"kind\":\"dev\",\"methods\":{},\"title\":\"Fortunna Yield Farming pools lib that contains all the errors.\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"A lib holding default errors.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/libraries/FortunnaErrorsLib.sol\":\"FortunnaErrorsLib\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/libraries/FortunnaErrorsLib.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/// @title Fortunna Yield Farming pools lib that contains all the errors.\\n/// @author Fortunna Team\\n/// @notice A lib holding default errors.\\nlibrary FortunnaErrorsLib {\\n    /// @dev An error to be reverted if an `account` would be\\n    /// banned.\\n    /// @param account A banned user.\\n    error Banned(address account);\\n\\n    /// @dev An error to be reverted if an unknown prototype name would be used to deploy\\n    /// a pool or other utility smart-contract.\\n    /// @param prototypeIndex An index of prototype smart-contract.\\n    error UnknownPrototypeIndex(uint256 prototypeIndex);\\n\\n    /// @dev An error to be reverted if the pool deployer didn't payed enough for it.\\n    /// @param amount An actual amount the deployer sent.\\n    error NotEnoughtPayment(uint256 amount);\\n\\n    /// @dev An error to be reverted if some data structures `length` is not defined correctly.\\n    /// @param length An actual length of the data structure.\\n    /// @param comment Some comment as to what kind of a data structure has been addressed to.\\n    error InvalidLength(uint256 length, string comment);\\n\\n    /// @dev An error to be reverted if in some two addresses arrays the elements aren't unique.\\n    /// @param someAddress An address which is equal in both arrays.\\n    error NotUniqueAddresses(address someAddress);\\n\\n    /// @dev An error to be reverted if the contract is being deployed at a wrong chain.\\n    /// @param chainId An actual chain ID.\\n    error ForeignChainId(uint256 chainId);\\n\\n    /// @dev An error to be reverted if some Euclidean interval hasn't been defined correctly.\\n    /// @param start A start of the interval.\\n    /// @param finish An end of the interval.\\n    /// @param comment Some comment as to what kind of an interval this is.\\n    error IncorrectInterval(uint256 start, uint256 finish, string comment);\\n\\n    /// @dev An error to be reverted if some base points were defined out of their boundaries.\\n    /// @param basePoints An actual base points amount.\\n    /// @param comment Some comment as to what kind of a base points this is.\\n    error IncorrectBasePoints(uint256 basePoints, string comment);\\n\\n    /// @dev An error to be reverted if an `enity` is already exists in some address set.\\n    /// @param entity An entity address.\\n    error AddressAlreadyExists(address entity);\\n\\n    /// @dev An error to be reverted if the contract was being called before the initialization.\\n    error NotInitialized();\\n\\n    /// @dev An error to be reverted if an `entity` does not possess the `role`.\\n    /// @param role A role an entity doesn't posess.\\n    /// @param entity An entity violating authorization.\\n    error NotAuthorized(bytes32 role, address entity);\\n\\n    /// @dev An error to be reverted if some scalar property of the data structure was addressed wrongly.\\n    /// @param scalar A scalar.\\n    /// @param comment Some comment as to what kind of a data structure property this is.\\n    error InvalidScalar(uint256 scalar, string comment);\\n\\n    /// @dev An error to be reverted if some pair of scalars is not equal, but they should be.\\n    /// @param x A first scalar.\\n    /// @param y A second scalar.\\n    /// @param comment Some comment as to what kind of a data structure property this is.\\n    error AreNotEqual(uint256 x, uint256 y, string comment);\\n\\n    error NotEnoughStaked(uint256 amount, uint256 limit);\\n\\n    error TooMuchStaked(uint256 amount, uint256 limit);\\n\\n    error DistributionEnded(uint256 timeDifference);\\n\\n    error DistributionNotStarted(uint256 timeDifference);\\n\\n    error InvalidWeightedInput(uint256[] amounts);\\n\\n    error NotEnoughRewardToDistribute(uint256 provided, uint256 actual);\\n\\n    error NotImplemented();\\n}\\n\",\"keccak256\":\"0x596563731924ab1fbf0706875e1d779b50ad814df109173141b4fdb192eafb58\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60556032600b8282823980515f1a607314602657634e487b7160e01b5f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f80fdfea264697066735822122066270a8f826a5fa4870b5c52fdb37568d36a2272cfea122c5a57a32a8d7edf1664736f6c63430008140033",
+  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040525f80fdfea264697066735822122066270a8f826a5fa4870b5c52fdb37568d36a2272cfea122c5a57a32a8d7edf1664736f6c63430008140033",
+  "devdoc": {
+    "author": "Fortunna Team",
+    "errors": {
+      "AddressAlreadyExists(address)": [
+        {
+          "details": "An error to be reverted if an `enity` is already exists in some address set.",
+          "params": {
+            "entity": "An entity address."
+          }
+        }
+      ],
+      "AreNotEqual(uint256,uint256,string)": [
+        {
+          "details": "An error to be reverted if some pair of scalars is not equal, but they should be.",
+          "params": {
+            "comment": "Some comment as to what kind of a data structure property this is.",
+            "x": "A first scalar.",
+            "y": "A second scalar."
+          }
+        }
+      ],
+      "Banned(address)": [
+        {
+          "details": "An error to be reverted if an `account` would be banned.",
+          "params": {
+            "account": "A banned user."
+          }
+        }
+      ],
+      "ForeignChainId(uint256)": [
+        {
+          "details": "An error to be reverted if the contract is being deployed at a wrong chain.",
+          "params": {
+            "chainId": "An actual chain ID."
+          }
+        }
+      ],
+      "IncorrectBasePoints(uint256,string)": [
+        {
+          "details": "An error to be reverted if some base points were defined out of their boundaries.",
+          "params": {
+            "basePoints": "An actual base points amount.",
+            "comment": "Some comment as to what kind of a base points this is."
+          }
+        }
+      ],
+      "IncorrectInterval(uint256,uint256,string)": [
+        {
+          "details": "An error to be reverted if some Euclidean interval hasn't been defined correctly.",
+          "params": {
+            "comment": "Some comment as to what kind of an interval this is.",
+            "finish": "An end of the interval.",
+            "start": "A start of the interval."
+          }
+        }
+      ],
+      "InvalidLength(uint256,string)": [
+        {
+          "details": "An error to be reverted if some data structures `length` is not defined correctly.",
+          "params": {
+            "comment": "Some comment as to what kind of a data structure has been addressed to.",
+            "length": "An actual length of the data structure."
+          }
+        }
+      ],
+      "InvalidScalar(uint256,string)": [
+        {
+          "details": "An error to be reverted if some scalar property of the data structure was addressed wrongly.",
+          "params": {
+            "comment": "Some comment as to what kind of a data structure property this is.",
+            "scalar": "A scalar."
+          }
+        }
+      ],
+      "NotAuthorized(bytes32,address)": [
+        {
+          "details": "An error to be reverted if an `entity` does not possess the `role`.",
+          "params": {
+            "entity": "An entity violating authorization.",
+            "role": "A role an entity doesn't posess."
+          }
+        }
+      ],
+      "NotEnoughtPayment(uint256)": [
+        {
+          "details": "An error to be reverted if the pool deployer didn't payed enough for it.",
+          "params": {
+            "amount": "An actual amount the deployer sent."
+          }
+        }
+      ],
+      "NotInitialized()": [
+        {
+          "details": "An error to be reverted if the contract was being called before the initialization."
+        }
+      ],
+      "NotUniqueAddresses(address)": [
+        {
+          "details": "An error to be reverted if in some two addresses arrays the elements aren't unique.",
+          "params": {
+            "someAddress": "An address which is equal in both arrays."
+          }
+        }
+      ],
+      "UnknownPrototypeIndex(uint256)": [
+        {
+          "details": "An error to be reverted if an unknown prototype name would be used to deploy a pool or other utility smart-contract.",
+          "params": {
+            "prototypeIndex": "An index of prototype smart-contract."
+          }
+        }
+      ]
+    },
+    "kind": "dev",
+    "methods": {},
+    "title": "Fortunna Yield Farming pools lib that contains all the errors.",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "A lib holding default errors.",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

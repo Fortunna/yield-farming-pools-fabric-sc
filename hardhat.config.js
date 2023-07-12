@@ -15,9 +15,11 @@ require("./tasks/get_all_artifacts")(task);
 
 const mainnetUrl = `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`;
 const sepoliaUrl = `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_SEPOLIA_API_KEY}`;
+const goerliUrl = `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_GOERLI_API_KEY}`;
 
 const mainnetChainId = 1;
 const sepoliaChainId = 11155111;
+const goerliChainId = 5;
 
 const optimizer = {
   enabled: true,
@@ -134,8 +136,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: mainnetUrl,
-        chainId: mainnetChainId
+        url: goerliUrl,
+        chainId: goerliChainId
       },
       saveDeployments: true
     },
@@ -148,7 +150,13 @@ module.exports = {
     sepolia: {
       url: sepoliaUrl,
       chainId: sepoliaChainId,
-      accounts: { mnemonic: process.env.MNEMONIC },
+      accounts: { mnemonic: process.env.TESTNET_DEPLOY_MNEMONIC },
+      saveDeployments: true
+    },
+    goerli: {
+      url: goerliUrl,
+      chainId: goerliChainId,
+      accounts: { mnemonic: process.env.TESTNET_DEPLOY_MNEMONIC },
       saveDeployments: true
     },
   },

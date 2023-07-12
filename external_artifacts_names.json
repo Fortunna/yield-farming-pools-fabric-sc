@@ -1,5 +1,6 @@
 {
     "usdt": "USDT",
     "weth": "WETH",
-    "nftPositionManager": "NonfungiblePositionManager"
+    "nftPositionManager": "NonfungiblePositionManager",
+    "specifiedIERC20": "@openzeppelin/contracts-new/token/ERC20/extensions/IERC20Metadata.sol:IERC20Metadata"
 }

@@ -23,7 +23,7 @@ module.exports =
     for (const tokenAddress of tokensAddresses) {
       const token = await (
         await hre.ethers.getContractAt(
-          "@openzeppelin/contracts-new/token/ERC20/extensions/IERC20Metadata.sol:IERC20Metadata",
+          hre.names.external.specifiedIERC20,
           tokenAddress
         )
       ).deployed();

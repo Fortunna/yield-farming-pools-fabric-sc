@@ -7,7 +7,7 @@ const keccak256 = require("keccak256");
 
 const DEAD_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 const skipIfAlreadyDeployed = true;
-const POOL_DEPLOY_COST = hre.ethers.utils.parseEther('0.1');
+const POOL_DEPLOY_COST = hre.ethers.utils.parseEther('0.000000000001');
 
 ////////////////////////////////////////////
 // Constants Ends
@@ -56,10 +56,11 @@ const emptyStage = (message) => {
   }
 };
 
-const getEventBody = async (eventName, contractInstance) => {
+const getEventBody = async (eventName, contractInstance, resultIndex=-1) => {
   const filter = contractInstance.filters[eventName]();
   const filterQueryResult = await contractInstance.queryFilter(filter);
-  return filterQueryResult[0].args;
+  const lastIndex = filterQueryResult.length == 0 ? 0 : filterQueryResult.length - 1;
+  return filterQueryResult[resultIndex == -1 ? lastIndex : resultIndex].args;
 }
 
 const grantRoles = async (

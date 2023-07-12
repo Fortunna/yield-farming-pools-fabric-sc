@@ -38,6 +38,7 @@ contract FortunnaPoolUniswapV3 is
 
     uint24 public constant POOL_FEE = 3000;
     uint256 public constant REWARDS_DURATION = 12 hours;
+    uint32 public constant LIQUIDITY_ADDITION_DEADLINE_DURATION = 1 hours;
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     uint8 public constant ASSETS_COUNT = 2;
 
@@ -268,7 +269,6 @@ contract FortunnaPoolUniswapV3 is
     }
 
     /// @notice Calls the mint function defined in periphery, mints the same amount of each token.
-    /// For this example we are providing 1000 PTT and 1000 USDC in liquidity
     /// @return liquidity The amount of liquidity for the position
     /// @return amount0 The amount of tokens[0]
     /// @return amount1 The amount of tokens[1]
@@ -315,10 +315,10 @@ contract FortunnaPoolUniswapV3 is
                 amount0Min: 0,
                 amount1Min: 0,
                 recipient: address(this),
-                deadline: block.timestamp
+                deadline: block.timestamp + LIQUIDITY_ADDITION_DEADLINE_DURATION
             });
 
-        // Note that the pool defined by PTT/USDC and fee tier 0.3% must already be created and initialized in order to mint
+        // Note that the pool defined by token0/token1 and fee tier 0.3% must already be created and initialized in order to mint
         (positionId, liquidity, amount0, amount1) = nonfungiblePositionManager
             .mint(params);
 
@@ -387,7 +387,7 @@ contract FortunnaPoolUniswapV3 is
                     liquidity: amountToDecrease,
                     amount0Min: 0,
                     amount1Min: 0,
-                    deadline: block.timestamp
+                    deadline: block.timestamp + LIQUIDITY_ADDITION_DEADLINE_DURATION
                 });
 
         (amount0, amount1) = nonfungiblePositionManager.decreaseLiquidity(
@@ -440,7 +440,7 @@ contract FortunnaPoolUniswapV3 is
                     amount1Desired: amountAdd1,
                     amount0Min: 0,
                     amount1Min: 0,
-                    deadline: block.timestamp
+                    deadline: block.timestamp + LIQUIDITY_ADDITION_DEADLINE_DURATION
                 });
 
         (liquidity, amount0, amount1) = nonfungiblePositionManager

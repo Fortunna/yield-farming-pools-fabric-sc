@@ -22,8 +22,8 @@ module.exports = deployPoolWithParams(
       utilizingTokensAddresses: [usdtAddress, wethAddress],
       stakingTokensFlags: [true, true],
       rewardTokensFlags: [true, true],
-      initialRewardAmounts: [[0, hre.ethers.constants.Zero], [1, hre.ethers.constants.Zero]],
-      initialDepositAmounts: [[0, hre.ethers.constants.Zero], [1, hre.ethers.constants.Zero]],
+      initialRewardAmounts: [[0, 0], [1, 0]],
+      initialDepositAmounts: [[0, 0], [1, 0]],
       customPoolParams: [
         nftPositionManagerAddress
       ]
