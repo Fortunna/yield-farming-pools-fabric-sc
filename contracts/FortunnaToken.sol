@@ -15,20 +15,30 @@ import "./FactoryAuthorized.sol";
 import "./interfaces/IFortunnaToken.sol";
 import "./interfaces/IFortunnaPool.sol";
 
+/// @title Fortunna Yield Farming Fortunna Token - Fortuna Dust.
+/// @author Fortunna Team
+/// @notice Deploys FortunnaToken either for staking or rewards providing.
 contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using SafeERC20 for IERC20;
     using FortunnaBitMaskLib for bytes32;
     using Address for address payable;
 
+    /// @notice A getter function of boolean variable that indicares either the token was meant for staking or rewards providing. 
     bool public isStakingOrRewardToken;
+    /// @notice A getter for the corresponding pool address that the contract is tied to.
     address public pool;
+    /// @notice A getter for the generative symbol function (like in IERC20).
     bytes internal underlyingTokensSymbols = bytes("");
 
+    /// @notice A getter for the list of an underlying tokens.
     address[] public underlyingTokens;
+    /// @notice A getter with 1 parameter - get an amount of an underlying token on the contract.
     mapping(uint256 => uint256) public getReserve;
 
+    /// @notice A classic OZ ERC20 constructor.
     constructor() ERC20("Fortunna Token", "FTA") {}
 
+    /// @inheritdoc IFortunnaToken
     function initialize(
         bool _stakingOrRewardTokens,
         FortunnaLib.PoolParameters calldata poolParameters,
@@ -100,6 +110,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         );
     }
 
+    /// @inheritdoc IFortunnaToken
     function calcUnderlyingTokensInOrOutPerFortunnaToken(
         uint256 underlyingTokenIdx,
         uint256 amountToMintOrBurn
@@ -111,6 +122,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
             FortunnaLib.PRECISION;
     }
 
+    /// @inheritdoc IFortunnaToken
     function calcFortunnaTokensInOrOutPerUnderlyingToken(
         uint256 underlyingTokenIdx,
         uint256 underlyingTokenAmountInOrOut
@@ -122,6 +134,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
             FortunnaLib.PRECISION;
     }
 
+    /// @inheritdoc IFortunnaToken
     function mint(
         address user,
         uint256 amountToMint
@@ -150,6 +163,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         _mint(user, amountToMint);
     }
 
+    /// @inheritdoc IFortunnaToken
     function burn(
         address payable user,
         uint256 amount
@@ -176,6 +190,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         _burn(user, amount);
     }
 
+    /// @dev A helper internal function that helps peruse the pairs list to find an amount of the underlying token under a certain index.
     function _getInitialAmountOfUnderlyingToken(
         uint256[2][] calldata pairs,
         uint8 idx
@@ -188,6 +203,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
         }
     }
 
+    /// @inheritdoc ERC20
     function _spendAllowance(
         address owner,
         address spender,

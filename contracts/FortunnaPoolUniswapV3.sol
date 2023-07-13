@@ -16,6 +16,9 @@ import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.s
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/external/IAccessControl.sol";
 
+/// @title Uniswap V3 Fortunna Yield Farming pool
+/// @author Fortunna Team
+/// @notice Deploys Uniswap V3 Fortunna Yield Farming pool.
 contract FortunnaPoolUniswapV3 is
     Initializable,
     Pausable,
@@ -23,48 +26,74 @@ contract FortunnaPoolUniswapV3 is
     IFortunnaPool,
     IERC721Receiver
 {
+    /// @dev A struct that holds an info for total rewards per user.
     struct RewardInfo {
+        // A user rewards per liquidity token already paid.
         uint256[ASSETS_COUNT] userRewardsPerTokensPaid;
+        // A user rewards claimable.
         uint256[ASSETS_COUNT] rewards;
     }
 
+    /// @dev A struct that holds an info about the deposit info per user.
     struct DepositInfo {
+        // A vector of amounts of underlying staking tokens.
         uint256[ASSETS_COUNT] amounts;
-        uint128 balance; // liquidity share
+        // A liquidity share that belongs to the user.
+        uint128 balance;
+        // Last time when users rewards were updated.
         uint256 lastDepositTime;
     }
 
+    /// @dev An address of the actual contract instance. The original address as part of the context.
     address private immutable __self = address(this);
 
+    /// @notice A getter for the constant that is a part of the Uniswap V3 setting - fee amount of the pool.
     uint24 public constant POOL_FEE = 3000;
+    /// @notice A getter for the constant that is a part of the Fortuna Pool setting - a time interval after which an admin has to update the provided reward amount.
     uint256 public constant REWARDS_DURATION = 12 hours;
+    /// @notice A getter for the constant that is a part of the Uniswap V3 setting - a deadline duration for the Uniswap V3 operations.
     uint32 public constant LIQUIDITY_ADDITION_DEADLINE_DURATION = 1 hours;
+    /// @notice A getter for the constant that is a part of the OZ AccessControl setting - An admin role.
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
+    /// @notice A getter for the constant that is a part of the Fortuna Pool setting - amount of underlying tokens.
     uint8 public constant ASSETS_COUNT = 2;
 
+    /// @notice A getter for the total liquidity minted.
     uint128 public totalLiquidity;
+    /// @notice A getter for the ID of the Nonfungible Position at the Uniswap V3.
     uint256 public positionId;
+    /// @notice A getter for the time when the pool has been updated recently.
     uint256 public lastUpdateTime;
+    /// @notice A getter for the time when the pool has to end the distribution.
     uint256 public periodFinish;
 
+    /// @notice A getter for the address of a NonfungiblePositionManager of Uniswap V3.
     INonfungiblePositionManager public nonfungiblePositionManager;
 
+    /// @notice A getter that returns a reward rates for both of the underlying staking tokens.
     uint256[ASSETS_COUNT] public rewardRates;
+    /// @notice A getter that returns a rewards per token stored per underlying staking token.
     uint256[ASSETS_COUNT] public rewardsPerTokenStored;
+    /// @notice A getter that returns a pair of addresses of underlying staking tokens.
     address[ASSETS_COUNT] public tokens;
 
+    /// @dev A field that contains the flag - if the contract was initialized.
     bool internal isInitialized;
+    /// @dev A field that contains the factory address.
     address internal _factory;
 
-    FortunnaLib.PoolParameters scalarParams;
-    FortunnaLib.PoolParametersArrays vectorParams;
+    /// @notice A getter that returns a set of scalar parameters of the pool.    
+    FortunnaLib.PoolParameters public scalarParams;
+    /// @dev An internal set of the vector parameters of the pool.
+    FortunnaLib.PoolParametersArrays internal vectorParams;
 
-    // user => amount paid \ reward amount in every token from `tokens`
+    /// @dev A getter that provides the `RewardInfo` struct instance per user.
     mapping(address => RewardInfo) internal rewardsInfo;
 
-    // owner => deposit info
+    /// @dev A getter that provides the `DepositInfo` struct instance per user.
     mapping(address => DepositInfo) internal depositsInfo;
 
+    /// @inheritdoc IFortunnaPool
     function initialize(
         address,
         FortunnaLib.PoolParameters calldata poolParameters,
@@ -81,6 +110,7 @@ contract FortunnaPoolUniswapV3 is
         isInitialized = true;
     }
 
+    /// @inheritdoc IFortunnaPool
     function factory() external view override returns (address) {
         return _factory;
     }
@@ -447,6 +477,7 @@ contract FortunnaPoolUniswapV3 is
             .increaseLiquidity(params);
     }
 
+    /// @dev A modifier that performs an update of the reward info per user. (Parameter: `user` - A user for which the info is updated.)
     modifier updateReward(address user) {
         lastUpdateTime = lastTimeRewardApplicable();
         for (uint8 i = 0; i < ASSETS_COUNT; i++) {
@@ -461,6 +492,7 @@ contract FortunnaPoolUniswapV3 is
         _;
     }
 
+    /// @dev A modifier that allows to continue an execution if the contract is being initialized.
     modifier onlyInitializing() {
         require(
             !isInitialized,
@@ -469,6 +501,7 @@ contract FortunnaPoolUniswapV3 is
         _;
     }
 
+    /// @dev A modifier that restricts the direct calls to the contract instance. 
     modifier delegatedOnly() {
         require(
             isInitialized && __self != address(this),
@@ -477,6 +510,7 @@ contract FortunnaPoolUniswapV3 is
         _;
     }
 
+    /// @dev A modifier that restricts the calls of a non-bearer of `role`. 
     modifier onlyRole(bytes32 role) {
         require(
             IAccessControl(_factory).hasRole(role, _msgSender()),

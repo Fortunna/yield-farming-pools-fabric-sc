@@ -10,6 +10,8 @@ import "./INativeTokenReceivable.sol";
 /// @author Fortunna Team
 /// @notice The Fortunna Yield Faming pools factory facilitates creation of Fortunna pools and control over the protocol fees.
 interface IFortunnaFactory is INativeTokenReceivable {
+    /// @notice An event to be emitted when the pool is created.
+    /// @param pool An address of the newly created pool.
     event PoolCreated(address indexed pool);
 
     /// @notice A getter function to acquire the payment info for one pool deploy.
@@ -65,15 +67,26 @@ interface IFortunnaFactory is INativeTokenReceivable {
     /// @notice A public getter function to acquire the total amount of deployed prototypes.
     function getPrototypesLength() external view returns (uint256);
 
+    /// @notice A helper function that could predict an address for the pool with a `poolProtoIdx` parameter.
+    /// @param poolProtoIdx An index of the pool prototype in the factory.
+    /// @return result A predicted address of the pool.
+    /// @return salt A salt bytes to deploy the pool to the predicted address.
     function predictPoolAddress(
         uint256 poolProtoIdx
     ) external view returns (address result, bytes32 salt);
 
+    /// @notice A helper function that could predict an address of the Fortuna Dust token for a specific pool.
+    /// @param poolProtoIdx A pool prototype index to which the token would be connected to.
+    /// @param poolIdx A specific already deployed pool index from the factory.
+    /// @param isStakingOrReward Is a Fortuna Dust token would be utilized as a staking or a reward token? True - staking, False - reward.
+    /// @return result An address of the would be deployed token.
+    /// @return salt A salt bytes to deploy such a token.
     function predictFortunnaTokenAddress(
         uint256 poolProtoIdx,
         uint256 poolIdx,
         bool isStakingOrReward
     ) external view returns (address result, bytes32 salt);
 
+    /// @notice A constant that indicates under which index in the factory there is a Fortuna Dust token prototype.
     function FORTUNNA_TOKEN_PROTO_INDEX() external view returns (uint256);
 }

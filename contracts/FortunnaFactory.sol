@@ -30,7 +30,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
     /// @dev A set of unique deployed prototypes.
     EnumerableSet.AddressSet internal prototypes;
 
-    /// @dev An index in `prototypes` of FortunnaToken. Depends on the addition process in the initialization function.
+    /// @notice An index in `prototypes` of FortunnaToken. Depends on the addition process in the initialization function.
     uint256 public constant override FORTUNNA_TOKEN_PROTO_INDEX = 2;
 
     /// @notice A constructor.
@@ -209,6 +209,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         }
     }
 
+    /// @inheritdoc IFortunnaFactory
     function predictPoolAddress(
         uint256 poolProtoIdx
     ) public view override returns (address result, bytes32 salt) {
@@ -217,6 +218,7 @@ contract FortunnaFactory is AccessControl, IFortunnaFactory {
         result = poolPrototypeAddress.predictDeterministicAddress(salt);
     }
 
+    /// @inheritdoc IFortunnaFactory
     function predictFortunnaTokenAddress(
         uint256 poolProtoIdx,
         uint256 poolIdx,

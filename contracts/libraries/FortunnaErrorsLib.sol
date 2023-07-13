@@ -66,17 +66,24 @@ library FortunnaErrorsLib {
     /// @param comment Some comment as to what kind of a data structure property this is.
     error AreNotEqual(uint256 x, uint256 y, string comment);
 
+    /// @dev An error to be reverted if some staker did not satisfy minimum limitations for the stake operation.
+    /// @param amount An actual stake amount provided.
+    /// @param limit A minimum limit to be satisfied.
     error NotEnoughStaked(uint256 amount, uint256 limit);
 
+    /// @dev An error to be reverted if some staker did not satisfy maximum limitations for the stake operation.
+    /// @param amount An actual stake amount provided.
+    /// @param limit A maximum limit to be satisfied.
     error TooMuchStaked(uint256 amount, uint256 limit);
 
+    /// @dev An error to be reverted if the pool expired.
+    /// @param timeDifference A time how long the pool is expired.
     error DistributionEnded(uint256 timeDifference);
 
+    /// @dev An error to be reverted if the pool has not yet been started.
+    /// @param timeDifference A time how long befire the pool is starting to work.
     error DistributionNotStarted(uint256 timeDifference);
 
-    error InvalidWeightedInput(uint256[] amounts);
-
+    /// @dev An error to be reverted if the pool lacks the rewards amount to distribute.
     error NotEnoughRewardToDistribute(uint256 provided, uint256 actual);
-
-    error NotImplemented();
 }

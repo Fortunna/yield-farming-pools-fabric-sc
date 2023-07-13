@@ -5,7 +5,9 @@ pragma solidity >=0.7.6 <=0.8.20;
 /// @author Fortunna Team
 /// @notice A lib holding default errors, helpers functions and constants.
 library FortunnaLib {
+    /// @dev A struct to hold some custom parameters for the pool that aren't external protocol agnostic.
     struct CustomPoolParameters {
+        // An address of the Uniswap V3 NonfungiblePositionManager contract.
         address nonfungiblePositionManager;
     }
 
