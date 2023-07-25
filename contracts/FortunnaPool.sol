@@ -101,22 +101,33 @@ contract FortunnaPool is IFortunnaPool, FactoryAuthorized {
         stakingToken.initialize(true, poolParameters, poolParametersArrays);
         rewardToken.initialize(false, poolParameters, poolParametersArrays);
 
-        uint256 amountToMint = calculateFortunnaTokens(
-            poolParametersArrays.initialDepositAmounts,
-            address(stakingToken)
-        );
-        if (amountToMint > 0) {
-            stakingToken.mint(poolOwner, amountToMint);
-            amountToMint = 0;
+        uint256[] memory amounts = new uint256[](poolParametersArrays.utilizingTokens.length);
+        for (uint256 i = 0; i < poolParametersArrays.initialDepositAmounts.length; i++) {
+            amounts[poolParametersArrays.initialDepositAmounts[i][0]] = poolParametersArrays.initialDepositAmounts[i][1];
         }
+        stakingToken.mint(poolOwner, amounts);
 
-        amountToMint = calculateFortunnaTokens(
-            poolParametersArrays.initialRewardAmounts,
-            address(rewardToken)
-        );
-        if (amountToMint > 0) {
-            rewardToken.mint(poolOwner, amountToMint);
+        for (uint256 i = 0; i < poolParametersArrays.initialRewardAmounts.length; i++) {
+            amounts[poolParametersArrays.initialRewardAmounts[i][0]] = poolParametersArrays.initialRewardAmounts[i][1];
         }
+        rewardToken.mint(poolOwner, amounts);
+        
+        // uint256 amountToMint = calculateFortunnaTokens(
+        //     poolParametersArrays.initialDepositAmounts,
+        //     address(stakingToken)
+        // );
+        // if (amountToMint > 0) {
+        //     stakingToken.mint(poolOwner, amountToMint);
+        //     amountToMint = 0;
+        // }
+
+        // amountToMint = calculateFortunnaTokens(
+        //     poolParametersArrays.initialRewardAmounts,
+        //     address(rewardToken)
+        // );
+        // if (amountToMint > 0) {
+        //     rewardToken.mint(poolOwner, amountToMint);
+        // }
     }
 
     /// @notice A helper function is to calculate the Fortuna Dust that would be minted when an initial amounts provided.

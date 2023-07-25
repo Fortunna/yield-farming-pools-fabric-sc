@@ -16,6 +16,11 @@ interface IFortunnaToken is IERC20, IERC20Metadata, INativeTokenReceivable {
     /// @param amount An amount to be minted.
     function mint(address user, uint256 amount) external payable;
 
+    function mint(
+        address user,
+        uint256[] calldata amounts
+    ) external payable;
+
     /// @notice A burn function that could be called either by anyone or only by an admin. Depends if the token is initialized as staking or reward token.
     /// @param user A user (burner) address.
     /// @param amount An amount to be burned.

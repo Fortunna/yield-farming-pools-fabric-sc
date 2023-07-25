@@ -23,7 +23,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     using FortunnaBitMaskLib for bytes32;
     using Address for address payable;
 
-    /// @notice A getter function of boolean variable that indicares either the token was meant for staking or rewards providing. 
+    /// @notice A getter function of boolean variable that indicares either the token was meant for staking or rewards providing.
     bool public isStakingOrRewardToken;
     /// @notice A getter for the corresponding pool address that the contract is tied to.
     address public pool;
@@ -138,7 +138,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
     function mint(
         address user,
         uint256 amountToMint
-    ) external payable override delegatedOnly {
+    ) public payable override delegatedOnly {
         if (!isStakingOrRewardToken) {
             _onlyRoleInFactory(FortunnaLib.LP_MINTER_BURNER_ROLE);
         }
@@ -159,6 +159,42 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
                 }
             }
             getReserve[i] += amountIn;
+        }
+        _mint(user, amountToMint);
+    }
+
+    /// @inheritdoc IFortunnaToken
+    function mint(
+        address user,
+        uint256[] calldata amounts
+    ) public payable override delegatedOnly {
+        if (!isStakingOrRewardToken) {
+            _onlyRoleInFactory(FortunnaLib.LP_MINTER_BURNER_ROLE);
+        }
+        if (amounts.length != underlyingTokens.length) {
+            revert FortunnaErrorsLib.InvalidScalar(
+                amounts.length,
+                "mustBeEqualToUnderlyingTokensLen"
+            );
+        }
+        uint256 amountToMint = 0;
+        for (uint256 i = 0; i < amounts.length; i++) {
+            amountToMint += calcFortunnaTokensInOrOutPerUnderlyingToken(
+                i,
+                amounts[i]
+            );
+            if (underlyingTokens[i] != address(0)) {
+                IERC20(underlyingTokens[i]).safeTransferFrom(
+                    user,
+                    address(this),
+                    amounts[i]
+                );
+            } else {
+                if (amounts[i] > msg.value) {
+                    revert FortunnaErrorsLib.NotEnoughtPayment(amounts[i]);
+                }
+            }
+            getReserve[i] += amounts[i];
         }
         _mint(user, amountToMint);
     }
