@@ -213,8 +213,7 @@ contract FortunnaToken is ERC20, FactoryAuthorized, IFortunnaToken {
                 amount
             );
             if (underlyingTokens[i] != address(0)) {
-                IERC20(underlyingTokens[i]).safeTransferFrom(
-                    address(this),
+                IERC20(underlyingTokens[i]).safeTransfer(
                     user,
                     amountOut
                 );
