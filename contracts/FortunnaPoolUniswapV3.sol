@@ -244,7 +244,6 @@ contract FortunnaPoolUniswapV3 is
     function lastTimeRewardApplicable()
         public
         view
-        delegatedOnly
         returns (uint256)
     {
         return block.timestamp < periodFinish ? block.timestamp : periodFinish;
@@ -255,7 +254,7 @@ contract FortunnaPoolUniswapV3 is
     /// @return Amount of reward per token staked.
     function rewardPerToken(
         uint8 index
-    ) public view delegatedOnly returns (uint256) {
+    ) public view returns (uint256) {
         if (totalLiquidity == 0) {
             return rewardsPerTokenStored[index];
         }
@@ -274,7 +273,7 @@ contract FortunnaPoolUniswapV3 is
     function earned(
         address user,
         uint8 index
-    ) public view delegatedOnly returns (uint256) {
+    ) public view returns (uint256) {
         return
             (depositsInfo[user].balance *
                 (rewardPerToken(index) -
