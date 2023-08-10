@@ -126,7 +126,6 @@ contract FortunnaPoolUniswapV3 is
         delegatedOnly
         whenNotPaused
         nonReentrant
-        onlyRole(DEFAULT_ADMIN_ROLE)
         updateReward(_msgSender())
     {
         address sender = _msgSender();
