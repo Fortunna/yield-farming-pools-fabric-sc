@@ -38,14 +38,14 @@ describe("FortunnaPoolUniswapV3", () => {
       await pool.tokens(1)
     );
 
-    await withImpersonatedSigner(wethWhale, async (wethWhaleSigner) => {
-      await mintNativeTokens(wethWhaleSigner, "0x1000000000000000000000000");
-      await token1Instance.connect(wethWhaleSigner).transfer(deployer, wethBalance);
-    });
-    await withImpersonatedSigner(usdtWhale, async (usdtWhaleSigner) => {
-      await mintNativeTokens(usdtWhaleSigner, "0x1000000000000000000000000");
-      await token0Instance.connect(usdtWhaleSigner).transfer(deployer, usdtBalance);
-    });
+    // await withImpersonatedSigner(wethWhale, async (wethWhaleSigner) => {
+    //   await mintNativeTokens(wethWhaleSigner, "0x1000000000000000000000000");
+    //   await token1Instance.connect(wethWhaleSigner).transfer(deployer, wethBalance);
+    // });
+    // await withImpersonatedSigner(usdtWhale, async (usdtWhaleSigner) => {
+    //   await mintNativeTokens(usdtWhaleSigner, "0x1000000000000000000000000");
+    //   await token0Instance.connect(usdtWhaleSigner).transfer(deployer, usdtBalance);
+    // });
   });
 
   it("Successful stake", async () => {

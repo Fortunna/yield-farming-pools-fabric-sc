@@ -5,10 +5,10 @@ module.exports.dependencies = [
   "external_goerli",
   "prototypes",
   "main",
+  "mint",
   "pool",
   "uniswap_v3_pool",
   "approvals_u3",
-  "mint",
   "update_tracer_names"
 ];
 module.exports.runAtTheEnd = true;

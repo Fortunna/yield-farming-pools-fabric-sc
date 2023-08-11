@@ -136,8 +136,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: mainnetUrl,
-        chainId: mainnetChainId
+        url: goerliUrl,
+        chainId: goerliChainId
       },
       saveDeployments: true
     },

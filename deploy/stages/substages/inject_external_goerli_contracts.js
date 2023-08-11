@@ -11,14 +11,18 @@ module.exports = async ({
     save,
     log
   );
+
+  const fortunnaTestTokenAAddress = (await deployments.get(hre.names.internal.productionTestTokenA)).address;
+  const fortunnaTestTokenBAddress = (await deployments.get(hre.names.internal.productionTestTokenB)).address;
+
   await getFakeDeployment(
-    "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+    fortunnaTestTokenAAddress,
     hre.names.external.weth,
     save,
     log
   );
   await getFakeDeployment(
-    "0x509Ee0d083DdF8AC028f2a56731412edD63223B9",
+    fortunnaTestTokenBAddress,
     hre.names.external.usdt,
     save,
     log
