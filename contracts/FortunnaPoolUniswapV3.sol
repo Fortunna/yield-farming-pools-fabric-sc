@@ -47,8 +47,6 @@ contract FortunnaPoolUniswapV3 is
     /// @dev An address of the actual contract instance. The original address as part of the context.
     address private immutable __self = address(this);
 
-    /// @notice A getter for the variable that is a part of the Uniswap V3 setting - fee amount of the pool.
-    uint24 public poolFee = 3000;
     /// @notice A getter for the constant that is a part of the Fortuna Pool setting - a time interval after which an admin has to update the provided reward amount.
     uint256 public constant REWARDS_DURATION = 12 hours;
     /// @notice A getter for the constant that is a part of the Uniswap V3 setting - a deadline duration for the Uniswap V3 operations.
@@ -113,18 +111,6 @@ contract FortunnaPoolUniswapV3 is
     /// @inheritdoc IFortunnaPool
     function factory() external view override returns (address) {
         return _factory;
-    }
-
-    /// @notice Changes a fee type of the pair to be invested in.
-    /// @dev WARNING: should the function be used twice - an older position is locked and inaccessible FOREVER.
-    /// @param newFeeType New tier value of the fee in a pair.
-    function setFeeType(uint24 newFeeType) 
-        external 
-        delegatedOnly 
-        whenNotPaused 
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        poolFee = newFeeType;
     }
 
     /// @notice Deposits tokens for the user.
@@ -347,9 +333,9 @@ contract FortunnaPoolUniswapV3 is
             memory params = INonfungiblePositionManager.MintParams({
                 token0: tokens[0],
                 token1: tokens[1],
-                fee: poolFee,
-                tickLower: TickMath.MIN_TICK,
-                tickUpper: TickMath.MAX_TICK,
+                fee: FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_FEE_TYPE,
+                tickLower: TickMath.MIN_TICK / FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING * FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING,
+                tickUpper: TickMath.MAX_TICK / FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING * FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING,
                 amount0Desired: amount0ToMint,
                 amount1Desired: amount1ToMint,
                 amount0Min: 0,
@@ -361,8 +347,8 @@ contract FortunnaPoolUniswapV3 is
         nonfungiblePositionManager.createAndInitializePoolIfNecessary(
             tokens[0], 
             tokens[1],
-            poolFee,
-            uint160(1 << 65) // 1:1 rate
+            FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_FEE_TYPE,
+            uint160(1 << 64) // 1:1 rate
         );
         (positionId, liquidity, amount0, amount1) = nonfungiblePositionManager
             .mint(params);

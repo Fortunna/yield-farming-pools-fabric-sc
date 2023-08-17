@@ -22,21 +22,21 @@ describe("FortunnaPoolUniswapV3", () => {
   let token1Instance;
 
   beforeEach(async () => {
-    await deployments.fixture(['debug']);
+    await deployments.fixture(['goerli']);
     const accounts = await getNamedAccounts();
     deployer = accounts.deployer;
     pool = await hre.ethers.getContractAt(
       hre.names.internal.fortunnaPoolUniswapV3,
       (await get(hre.names.internal.fortunnaPoolUniswapV3 + "_Clone")).address
     );
-    token0Instance = await hre.ethers.getContractAt(
-      hre.names.external.specifiedIERC20,
-      await pool.tokens(0)
-    );
-    token1Instance = await hre.ethers.getContractAt(
-      hre.names.external.specifiedIERC20,
-      await pool.tokens(1)
-    );
+    // token0Instance = await hre.ethers.getContractAt(
+    //   hre.names.external.specifiedIERC20,
+    //   await pool.tokens(0)
+    // );
+    // token1Instance = await hre.ethers.getContractAt(
+    //   hre.names.external.specifiedIERC20,
+    //   await pool.tokens(1)
+    // );
 
     // await withImpersonatedSigner(wethWhale, async (wethWhaleSigner) => {
     //   await mintNativeTokens(wethWhaleSigner, "0x1000000000000000000000000");

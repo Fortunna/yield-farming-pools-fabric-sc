@@ -86,10 +86,16 @@ library FortunnaLib {
     /// @notice A max of base points. (ex. Like 100 in percents)
     uint256 public constant BASE_POINTS_MAX = 10000;
 
-    /// @notice A given precision for math operations;
+    /// @notice A given precision for math operations.
     uint256 public constant PRECISION = 1e10;
 
-    /// @notice A dead address for floor tokens to be minted
+    /// @notice A dead address for floor tokens to be minted.
     address public constant DEAD_ADDRESS =
         0x000000000000000000000000000000000000dEaD;
+    
+    /// @notice A fee type of the UniswapV3-based pools would invest users money to.
+    uint24 public constant FORTUNNA_POOL_UNISWAP_V3_FEE_TYPE = 3000;
+
+    /// @notice A tick spacing of the UniswapV3-based pools would invest users money to.
+    int24 public constant FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING = 60;
 }
