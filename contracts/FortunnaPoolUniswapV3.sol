@@ -17,8 +17,6 @@ import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.s
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/external/IAccessControl.sol";
 
-import "hardhat/console.sol";
-
 /// @title Uniswap V3 Fortunna Yield Farming pool
 /// @author Fortunna Team
 /// @notice Deploys Uniswap V3 Fortunna Yield Farming pool.
@@ -432,11 +430,6 @@ contract FortunnaPoolUniswapV3 is
         );
         _collectAllFees();
 
-        console.log("a0", amount0);
-        console.log("a1", amount1);
-        console.log("b0", IERC20(tokens[0]).balanceOf(address(this)));
-        console.log("b1", IERC20(tokens[1]).balanceOf(address(this)));
-
         TransferHelper.safeTransfer(tokens[0], sender, amount0);
         TransferHelper.safeTransfer(tokens[1], sender, amount1);
     }
@@ -489,6 +482,14 @@ contract FortunnaPoolUniswapV3 is
 
         (liquidity, amount0, amount1) = nonfungiblePositionManager
             .increaseLiquidity(params);
+    }
+
+    /// @notice A getter function that is to provide a liquidity balance of a specific user.
+    /// @dev A liquidity balance is equal to a liquidity of a UniswapV3 pair that has been deposited by the user in stake function.
+    /// @param user A user that is being checked.
+    /// @return A value of a liquidity that user has deposited.
+    function depositOf(address user) external view returns(uint128) {
+        return depositsInfo[user].balance;
     }
 
     /// @dev A modifier that performs an update of the reward info per user. (Parameter: `user` - A user for which the info is updated.)
