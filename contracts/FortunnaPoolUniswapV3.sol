@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
@@ -15,6 +16,8 @@ import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.s
 
 import "./interfaces/IFortunnaPool.sol";
 import "./interfaces/external/IAccessControl.sol";
+
+import "hardhat/console.sol";
 
 /// @title Uniswap V3 Fortunna Yield Farming pool
 /// @author Fortunna Team
@@ -55,6 +58,8 @@ contract FortunnaPoolUniswapV3 is
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     /// @notice A getter for the constant that is a part of the Fortuna Pool setting - amount of underlying tokens.
     uint8 public constant ASSETS_COUNT = 2;
+    /// @notice A getter for the constant that is an initial value for Uniswap V3 pool; and is equal to: 2^96. So an initial stake parameters should be equal.
+    uint160 public constant INITIAL_SQRT_PRICE_X96 = uint160(1 << 96);
 
     /// @notice A getter for the total liquidity minted.
     uint128 public totalLiquidity;
@@ -80,7 +85,7 @@ contract FortunnaPoolUniswapV3 is
     /// @dev A field that contains the factory address.
     address internal _factory;
 
-    /// @notice A getter that returns a set of scalar parameters of the pool.    
+    /// @notice A getter that returns a set of scalar parameters of the pool.
     FortunnaLib.PoolParameters public scalarParams;
     /// @dev An internal set of the vector parameters of the pool.
     FortunnaLib.PoolParametersArrays internal vectorParams;
@@ -135,6 +140,10 @@ contract FortunnaPoolUniswapV3 is
         uint256[ASSETS_COUNT] memory addedActualAmounts;
         uint128 addedLiquidity;
         if (totalLiquidity == 0) {
+            require(
+                amount0 == amount1,
+                "FortunnaPoolUniswapV3: to initialize a new pair an equal stake parameters should be provided."
+            );
             (
                 addedLiquidity,
                 addedActualAmounts[0],
@@ -239,20 +248,14 @@ contract FortunnaPoolUniswapV3 is
     /// @notice Retrieves the last time reward was applicable.
     /// @dev Allows the contract to correctly calculate rewards earned by users.
     /// @return Last time reward was applicable.
-    function lastTimeRewardApplicable()
-        public
-        view
-        returns (uint256)
-    {
+    function lastTimeRewardApplicable() public view returns (uint256) {
         return block.timestamp < periodFinish ? block.timestamp : periodFinish;
     }
 
     /// @notice Retrieves the amount of reward per token staked.
     /// @dev The logic is derived from the StakingRewards contract.
     /// @return Amount of reward per token staked.
-    function rewardPerToken(
-        uint8 index
-    ) public view returns (uint256) {
+    function rewardPerToken(uint8 index) public view returns (uint256) {
         if (totalLiquidity == 0) {
             return rewardsPerTokenStored[index];
         }
@@ -268,10 +271,7 @@ contract FortunnaPoolUniswapV3 is
     /// @dev The logic is derived from the StakingRewards contract.
     /// @param user User address.
     /// @return Amount of rewards earned by the user.
-    function earned(
-        address user,
-        uint8 index
-    ) public view returns (uint256) {
+    function earned(address user, uint8 index) public view returns (uint256) {
         return
             (depositsInfo[user].balance *
                 (rewardPerToken(index) -
@@ -334,8 +334,12 @@ contract FortunnaPoolUniswapV3 is
                 token0: tokens[0],
                 token1: tokens[1],
                 fee: FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_FEE_TYPE,
-                tickLower: TickMath.MIN_TICK / FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING * FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING,
-                tickUpper: TickMath.MAX_TICK / FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING * FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING,
+                tickLower: (TickMath.MIN_TICK /
+                    FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING) *
+                    FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING,
+                tickUpper: (TickMath.MAX_TICK /
+                    FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING) *
+                    FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_TICK_SPACING,
                 amount0Desired: amount0ToMint,
                 amount1Desired: amount1ToMint,
                 amount0Min: 0,
@@ -344,11 +348,12 @@ contract FortunnaPoolUniswapV3 is
                 deadline: block.timestamp + LIQUIDITY_ADDITION_DEADLINE_DURATION
             });
 
+
         nonfungiblePositionManager.createAndInitializePoolIfNecessary(
-            tokens[0], 
+            tokens[0],
             tokens[1],
             FortunnaLib.FORTUNNA_POOL_UNISWAP_V3_FEE_TYPE,
-            uint160(1 << 64) // 1:1 rate
+            INITIAL_SQRT_PRICE_X96
         );
         (positionId, liquidity, amount0, amount1) = nonfungiblePositionManager
             .mint(params);
@@ -418,12 +423,19 @@ contract FortunnaPoolUniswapV3 is
                     liquidity: amountToDecrease,
                     amount0Min: 0,
                     amount1Min: 0,
-                    deadline: block.timestamp + LIQUIDITY_ADDITION_DEADLINE_DURATION
+                    deadline: block.timestamp +
+                        LIQUIDITY_ADDITION_DEADLINE_DURATION
                 });
 
         (amount0, amount1) = nonfungiblePositionManager.decreaseLiquidity(
             params
         );
+        _collectAllFees();
+
+        console.log("a0", amount0);
+        console.log("a1", amount1);
+        console.log("b0", IERC20(tokens[0]).balanceOf(address(this)));
+        console.log("b1", IERC20(tokens[1]).balanceOf(address(this)));
 
         TransferHelper.safeTransfer(tokens[0], sender, amount0);
         TransferHelper.safeTransfer(tokens[1], sender, amount1);
@@ -471,7 +483,8 @@ contract FortunnaPoolUniswapV3 is
                     amount1Desired: amountAdd1,
                     amount0Min: 0,
                     amount1Min: 0,
-                    deadline: block.timestamp + LIQUIDITY_ADDITION_DEADLINE_DURATION
+                    deadline: block.timestamp +
+                        LIQUIDITY_ADDITION_DEADLINE_DURATION
                 });
 
         (liquidity, amount0, amount1) = nonfungiblePositionManager
@@ -486,8 +499,8 @@ contract FortunnaPoolUniswapV3 is
             if (user != address(0)) {
                 rewardsInfo[user].rewards[i] = earned(user, i);
                 rewardsInfo[user].userRewardsPerTokensPaid[
-                    i
-                ] = rewardsPerTokenStored[i];
+                        i
+                    ] = rewardsPerTokenStored[i];
             }
         }
         _;
@@ -502,7 +515,7 @@ contract FortunnaPoolUniswapV3 is
         _;
     }
 
-    /// @dev A modifier that restricts the direct calls to the contract instance. 
+    /// @dev A modifier that restricts the direct calls to the contract instance.
     modifier delegatedOnly() {
         require(
             isInitialized && __self != address(this),
@@ -511,7 +524,7 @@ contract FortunnaPoolUniswapV3 is
         _;
     }
 
-    /// @dev A modifier that restricts the calls of a non-bearer of `role`. 
+    /// @dev A modifier that restricts the calls of a non-bearer of `role`.
     modifier onlyRole(bytes32 role) {
         require(
             IAccessControl(_factory).hasRole(role, _msgSender()),

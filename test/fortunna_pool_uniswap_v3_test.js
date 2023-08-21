@@ -49,7 +49,8 @@ describe("FortunnaPoolUniswapV3", () => {
   });
 
   it("Successful stake", async () => {
-    const stakingTxReceipt = await pool.stake(usdtBalance, wethBalance);
+    const stakingTxReceipt = await pool.stake(ethers.utils.parseUnits('1', 6), ethers.utils.parseUnits('1', 6));
+    await pool.exit();
     // expect(stakingTxReceipt).to.emit("Staked", pool).withArgs(
     //   deployer,
     //   amount
